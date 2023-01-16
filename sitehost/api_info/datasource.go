@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/gosh/pkg/api/api"
+	"github.com/sitehostnz/gosh/pkg/api/api_info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -24,7 +24,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	client := api.New(conf.Client)
+	client := api_info.New(conf.Client)
 
 	apiInfo, err := client.Get(ctx)
 	if err != nil {
