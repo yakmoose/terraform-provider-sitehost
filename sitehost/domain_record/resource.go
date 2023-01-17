@@ -99,7 +99,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	client := domain_record.New(conf.Client)
 
-	_, err := client.Delete(ctx, &models.DomainRecord{Domain: d.Get("domain").(string), Id: d.Id()})
+	_, err := client.Delete(ctx, &models.DomainRecord{Domain: d.Get("domain").(string), ID: d.Id()})
 
 	if err != nil {
 		return diag.Errorf("Error deleting domain record: %s", err)
@@ -119,7 +119,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	domainRecord, err := client.Update(
 		ctx,
 		&models.DomainRecord{
-			Id:       d.Id(),
+			ID:       d.Id(),
 			Domain:   d.Get("domain").(string),
 			Name:     d.Get("name").(string),
 			Type:     d.Get("type").(string),
