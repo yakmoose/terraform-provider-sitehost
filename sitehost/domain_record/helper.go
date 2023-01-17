@@ -35,7 +35,7 @@ func deconstructFqdn(name, domain string) string {
 }
 
 func updateRecordResource(d *schema.ResourceData, domainRecord *models.DomainRecord) {
-	d.SetId(domainRecord.Id)
+	d.SetId(domainRecord.ID)
 	d.Set("domain", domainRecord.Domain)
 	d.Set("name", deconstructFqdn(domainRecord.Name, domainRecord.Domain))
 	d.Set("record", domainRecord.Content)
