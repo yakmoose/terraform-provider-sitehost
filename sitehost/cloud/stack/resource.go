@@ -98,7 +98,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	//if !ok {
 	//	return diag.Errorf("failed to convert meta object")
 	//}
-	//
+
 	//client := domain.New(conf.Client)
 	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
 

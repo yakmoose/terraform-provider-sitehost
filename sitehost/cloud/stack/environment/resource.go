@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
+	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"strings"
 )
@@ -74,7 +75,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	var settings = map[string]string{}
 	for _, v := range *environment {
-		settings[v.Name] = v.Content
+		settings[strings.ToUpper(v.Name)] = v.Content
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
@@ -88,13 +89,42 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 // updateResource is a function to update a stack environment.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	//}
-	//
-	//client := domain.New(conf.Client)
-	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
+	conf, ok := meta.(*helper.CombinedConfig)
+	if !ok {
+		return diag.Errorf("failed to convert meta object")
+	}
+
+	serverName := d.Get("server_name").(string)
+	project := d.Get("project").(string)
+	service := d.Get("service").(string)
+
+	if "" == service {
+		service = project
+	}
+
+	settings := d.Get("settings").(map[string]interface{})
+	var environmentVariables = []models.EnvironmentVariable{}
+	for k, v := range settings {
+		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: k, Content: v.(string)})
+	}
+
+	client := environment.New(conf.Client)
+	job, err := client.Update(
+		ctx,
+		environment.UpdateRequest{
+			ServerName:           serverName,
+			Project:              project,
+			Service:              service,
+			EnvironmentVariables: &environmentVariables,
+		})
+
+	if nil != err {
+		return diag.Errorf("Error updating environment info: %s", err)
+	}
+
+	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
