@@ -11,6 +11,7 @@ import (
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
+	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -117,6 +118,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
+
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[project]/[service]", d.Id())
 	}
