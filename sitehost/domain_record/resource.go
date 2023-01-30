@@ -44,7 +44,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Domain:   domain,
 			Type:     d.Get("type").(string),
 			Priority: strconv.Itoa(d.Get("priority").(int)),
-			Name:     constructFqdn(name, domain),
+			Name:     name,
 			Content:  d.Get("record").(string),
 		},
 	)
@@ -53,7 +53,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error creating domain_record: %s", err)
 	}
 	if domainRecord == nil {
-		return diag.Errorf("Failed creating domain_record: %s", domainRecord)
+		return diag.Errorf("Invalid response creating domain_record: %s", domainRecord)
 	}
 
 	updateRecordResource(d, domainRecord)
@@ -76,6 +76,8 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		ctx,
 		domain_record.RecordRequest{DomainName: d.Get("domain").(string), Id: d.Id()},
 	)
+
+	log.Printf("[INFO] Reading Domain Record: %s", domainRecord)
 
 	if err != nil {
 		return diag.Errorf("Error retrieving domain: %s", err)
@@ -143,8 +145,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func importResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
-	if strings.Contains(d.Id(), ",") {
-		s := strings.Split(d.Id(), ",")
+	if strings.Contains(d.Id(), "/") {
+		s := strings.Split(d.Id(), "/")
 
 		d.SetId(s[1])
 		d.Set("domain", s[0])

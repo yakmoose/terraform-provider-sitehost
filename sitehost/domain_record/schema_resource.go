@@ -19,8 +19,15 @@ var resourceSchema = map[string]*schema.Schema{
 	"name": {
 		Type:         schema.TypeString,
 		Required:     true,
+		ForceNew:     true,
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+
+			domain := d.Get("domain").(string)
+
+			return (oldValue == "@" && newValue == domain) || (oldValue+"."+domain == newValue)
+		},
 	},
 
 	"type": {
@@ -58,9 +65,9 @@ var resourceSchema = map[string]*schema.Schema{
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 			// bloody dots at the end of records...
-			return strings.TrimSuffix(old, ".") == strings.TrimSuffix(new, ".")
+			return strings.TrimSuffix(oldValue, ".") == strings.TrimSuffix(newValue, ".")
 		},
 	},
 
