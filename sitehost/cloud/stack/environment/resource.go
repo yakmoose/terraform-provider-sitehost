@@ -76,7 +76,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	project := d.Get("project").(string)
 	service := d.Get("service").(string)
 
-	if service == "" {
+	if "" == service {
 		service = project
 	}
 
@@ -87,13 +87,13 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := environment.New(conf.Client)
-	jobResponse, err := client.Update(
+	job, err := client.Update(
 		ctx,
 		environment.UpdateRequest{
 			ServerName:           serverName,
 			Project:              project,
 			Service:              service,
-			EnvironmentVariables: environmentVariables,
+			EnvironmentVariables: &environmentVariables,
 		})
 
 	if nil != err {
@@ -102,8 +102,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
-
+	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
