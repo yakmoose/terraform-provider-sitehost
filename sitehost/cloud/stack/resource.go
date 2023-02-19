@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
-	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"strings"
 )
 
@@ -48,46 +45,6 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	//creating takes a bunch of stuff, and returns a job
 	// wait for the job and stuf it back
 	// there are a bunch of thigns that we get that are computed
-
-	return nil
-}
-
-// readResource is a function to read a stack environment.
-func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	conf, ok := meta.(*helper.CombinedConfig)
-	if !ok {
-		return diag.Errorf("failed to convert meta object")
-	}
-
-	serverName := d.Get("server").(string)
-	name := d.Get("name").(string)
-
-	stackClient := stack.New(conf.Client)
-	stack, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
-	if err != nil {
-		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, stack, err)
-	}
-
-	environmentClient := environment.New(conf.Client)
-	environment, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
-	if err != nil {
-		return diag.Errorf("Error retrieving environment info: server %s, stack %s, %s", serverName, stack, err)
-	}
-
-	var settings = map[string]string{}
-	for _, v := range *environment {
-		settings[v.Name] = v.Content
-	}
-
-	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
-	d.Set("server_name", serverName)
-
-	if len(settings) > 0 {
-		d.Set("settings", settings)
-	}
-
-	// what things do we need to set here???
-	// all the computed thigns that we may or may not have...
 
 	return nil
 }

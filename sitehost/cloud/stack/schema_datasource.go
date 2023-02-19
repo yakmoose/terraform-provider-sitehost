@@ -20,33 +20,88 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 			Description: "The stack label",
 		},
 
-		"server_id": {
-			Type:        schema.TypeString,
+		// this is a create option, and is reflected in the docker file
+		//"enable_ssl": {
+		//	Type:        schema.TypeBool,
+		//	Required:    true,
+		//	Description: "Enable or disable SSL",
+		//},
+
+		// These options are used to create the docker_file
+		"monitored": {
+			Type:        schema.TypeBool,
 			Computed:    true,
-			Description: "The server id",
+			Description: "Enable or disable SSL",
+		},
+		"type": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
+		"backup_disable": {
+			Computed: true,
+			Type:     schema.TypeBool,
 		},
 
-		"server_name": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "The server name",
+		// this likely has rules in the main sh api around custom vs sh containers
+		"image_update": {
+			Computed: true,
+			Type:     schema.TypeBool,
 		},
 
-		"server_label": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "The server label",
+		//virtual hosts are called aliases in the sh UI
+		"aliases": {
+			Computed: true,
+			Type:     schema.TypeList,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		},
-
+		"image": {
+			Computed: true,
+			Type:     schema.TypeString,
+		},
 		"docker_file": {
-			Type:        schema.TypeString,
 			Computed:    true,
-			Description: "The docker file used by the stack/container",
+			Type:        schema.TypeString,
+			Description: "The docker compose file as returned from the server, that we have generated on create and bundles thigns together",
 		},
-		"ip_address": {
+
+		"expose": {
+			Computed: true,
+			Type:     schema.TypeList,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+
+		// questions, is the volumes standard? or comes from elsewhere? ports etc...
+		//
+
+		// this will be an abstraction on top of the other schema stuff
+		// since we can add them when creating, but updating does not change these
+		"settings": {
+			Computed: true,
+			Type:     schema.TypeMap,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
+		},
+
+		// server properties, can't change these, informational only
+		"server_name": {
+			Required:    true,
 			Type:        schema.TypeString,
+			Description: "The Server name where the stack lives",
+		},
+		"server_label": {
 			Computed:    true,
-			Description: "The server ip address",
+			Type:        schema.TypeString,
+			Description: "The Server label",
+		},
+		"server_ip_address": {
+			Computed:    true,
+			Type:        schema.TypeString,
+			Description: "The server IP address",
 		},
 	}
 }
