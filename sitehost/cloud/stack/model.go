@@ -11,8 +11,8 @@ type (
 		Restart     string            `yaml:"restart,omitempty"`
 		// looks like a map, but it's an array of things
 		// yaml parser won't treat it as a map
-		Labels  []string `yaml:"labels,omitempty"`
-		Volumes []string `yaml:"volumes,omitempty"`
+		Labels      map[string]string `yaml:"labels,omitempty"`
+		Volumes     []string          `yaml:"volumes,omitempty"`
 	}
 
 	Compose struct {

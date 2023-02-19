@@ -15,7 +15,7 @@ func DataSource() *schema.Resource {
 	recordSchema := stackDataSourceSchema()
 
 	return &schema.Resource{
-		ReadContext: readDataSource,
+		ReadContext: readResource,
 		Schema:      recordSchema,
 	}
 }
