@@ -63,7 +63,9 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	client := dns.New(conf.Client)
+	domain := d.Id()
 	response, err := client.GetZone(ctx, dns.GetZoneRequest{DomainName: d.Id()})
+
 	if err != nil {
 		return diag.Errorf("Error retrieving domain: %s", err)
 	}
@@ -82,7 +84,16 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 	}
 
-	return diag.Errorf("Error finding the domain")
+	if !exist {
+		return diag.Errorf("Failed retrieving domain: %s", err)
+	}
+
+	d.SetId(domain)
+	d.Set("name", domain)
+
+	log.Printf("[INFO] Domain Name: %s", domain)
+
+	return nil
 }
 
 // deleteZoneResource is a function to delete a DNS Zone.
@@ -94,6 +105,7 @@ func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 
 	client := dns.New(conf.Client)
 	resp, err := client.DeleteZone(ctx, dns.DeleteZoneRequest{DomainName: d.Id()})
+
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
 	}
@@ -127,26 +139,21 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	domainRecord := models.DNSRecord{
-		Name:     fmt.Sprintf("%v", d.Get("name")),
-		Domain:   fmt.Sprintf("%v", d.Get("domain")),
-		Type:     fmt.Sprintf("%v", d.Get("type")),
-		Content:  fmt.Sprintf("%v", d.Get("record")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
-	}
+	domain := d.Get("domain").(string)
+	name := d.Get("name").(string)
+	domainRecord := helper.ConstructFqdn(name, domain)
 
 	client := dns.New(conf.Client)
-	resp, err := client.AddRecord(ctx, dns.AddRecordRequest{
-		Domain:   domainRecord.Domain,
-		Type:     domainRecord.Type,
-		Name:     domainRecord.Name,
-		Content:  domainRecord.Content,
-		Priority: domainRecord.Priority,
-	})
-	if err != nil {
-		return diag.Errorf("Error creating DNS record: %s", err)
-	}
-
-	if !resp.Status {
+	_, err := client.AddRecord(
+		ctx,
+		dns.AddRecordRequest{
+			Domain:   domain,
+			Type:     d.Get("type").(string),
+			Name:     domainRecord,
+			Content:  d.Get("record").(string),
+			Priority: strconv.Itoa(d.Get("priority").(int)),
+		},
+	)
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
@@ -220,6 +227,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	client := dns.New(conf.Client)
+
 	resp, err := client.UpdateRecord(
 		ctx,
 		dns.UpdateRecordRequest{
@@ -256,6 +264,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 
 // importRecordResource is a function to import a DNS Record.
 func importRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
 	if strings.Contains(d.Id(), ",") {
 		s := strings.Split(d.Id(), ",")
 
@@ -277,6 +286,7 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	}
 
 	if err := d.Set("name", record.Name); err != nil {
+// 	} else {
 		return err
 	}
 
