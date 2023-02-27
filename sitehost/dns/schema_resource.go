@@ -70,9 +70,8 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			// bloody dots at the end of records...
-			return strings.TrimSuffix(old, ".") == strings.TrimSuffix(new, ".")
+		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
 		},
 	},
 
