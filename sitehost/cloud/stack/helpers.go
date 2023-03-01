@@ -9,7 +9,6 @@ import (
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"gopkg.in/yaml.v3"
-	"strconv"
 	"strings"
 )
 
@@ -33,14 +32,15 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	name := d.Get("name").(string)
 
 	stackClient := stack.New(conf.Client)
-	stack, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
+	stackResponse, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
 	if err != nil {
-		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, stack, err)
+		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, stackResponse.Stack, err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
+	stack := stackResponse.Stack
 
-	d.Set("server_ip_address", stack.IpAddress)
+	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
+	d.Set("server_ip_address", stack.IPAddress)
 	d.Set("server_label", stack.Server)
 	d.Set("docker_file", stack.DockerFile)
 	d.Set("label", stack.Label)
@@ -49,12 +49,12 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	// d.Set("", stack.Containers)
 
 	environmentClient := environment.New(conf.Client)
-	environment, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
+	environmentVariablesResponse, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
 	if err != nil {
 		return diag.Errorf("Error retrieving environment info: server %s, stack %s, %s", serverName, stack, err)
 	}
 	var settings = map[string]string{}
-	for _, v := range *environment {
+	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[v.Name] = v.Content
 	}
 	if len(settings) > 0 {
@@ -62,7 +62,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	// unmarshall the docker file
-	dockerFile := DockerFile{}
+	dockerFile := Compose{}
 	yaml.Unmarshal([]byte(stack.DockerFile), &dockerFile)
 
 	// the big assumption here... for now... is that we are going to have only one service?
@@ -86,26 +86,26 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	d.Set("aliases", virtualHosts)
-	d.Set("type", extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.type"))
-
-	v, err := strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.image_update"))
-	if err != nil {
-		v = false
-	}
-	d.Set("image_update", v)
-
-	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.monitored"))
-	if err != nil {
-		v = false
-	}
-	d.Set("monitored", v)
-
-	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.backup_disable"))
-	if err != nil {
-		v = false
-	}
-	d.Set("backup_disable", v)
+	//d.Set("aliases", virtualHosts)
+	//d.Set("type", extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.type"))
+	//
+	//v, err := strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.image_update"))
+	//if err != nil {
+	//	v = false
+	//}
+	//d.Set("image_update", v)
+	//
+	//v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.monitored"))
+	//if err != nil {
+	//	v = false
+	//}
+	//d.Set("monitored", v)
+	//
+	//v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.backup_disable"))
+	//if err != nil {
+	//	v = false
+	//}
+	//d.Set("backup_disable", v)
 
 	return nil
 }

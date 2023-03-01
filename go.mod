@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.15.0
 	github.com/ory/go-acc v0.2.8
 	github.com/sitehostnz/gosh v0.3.4
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -227,7 +228,6 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.4.7 // indirect
 	mvdan.cc/gofumpt v0.6.0 // indirect
 	mvdan.cc/interfacer v0.0.0-20180901003855-c20040233aed // indirect

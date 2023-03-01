@@ -57,7 +57,9 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 
 	"restart": {
-		Type: schema.TypeString,
+		Type:     schema.TypeString,
+		Default:  "unless-stopped",
+		Optional: true,
 		ValidateFunc: validation.StringInSlice([]string{
 			"always",
 			"unless-stopped",
@@ -131,9 +133,9 @@ var resourceSchema = map[string]*schema.Schema{
 		Description: "The server IP address",
 	},
 
-	"containers": {
-		Type:     schema.TypeList,
-		Computed: true,
-		Optional: false,
-	},
+	//"containers": {
+	//	Type:     schema.TypeList,
+	//	Computed: true,
+	//	Optional: false,
+	//},
 }

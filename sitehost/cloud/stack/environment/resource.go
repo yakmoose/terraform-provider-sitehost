@@ -68,13 +68,13 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	client := environment.New(conf.Client)
-	environment, err := client.Get(ctx, environment.GetRequest{ServerName: serverName, Project: project, Service: service})
+	environmentVariablesResponse, err := client.Get(ctx, environment.GetRequest{ServerName: serverName, Project: project, Service: service})
 	if err != nil {
 		return diag.Errorf("Error retrieving environment info: %s", err)
 	}
 
 	var settings = map[string]string{}
-	for _, v := range *environment {
+	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[strings.ToUpper(v.Name)] = v.Content
 	}
 
@@ -115,7 +115,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			ServerName:           serverName,
 			Project:              project,
 			Service:              service,
-			EnvironmentVariables: &environmentVariables,
+			EnvironmentVariables: environmentVariables,
 		})
 
 	if nil != err {

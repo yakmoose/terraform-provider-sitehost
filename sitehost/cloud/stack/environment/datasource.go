@@ -32,7 +32,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := environment.New(conf.Client)
-	environmentVariables, err := client.Get(ctx, environment.GetRequest{
+	environmentVariablesResponse, err := client.Get(ctx, environment.GetRequest{
 		ServerName: serverName,
 		Project:    project,
 		Service:    service,
@@ -42,7 +42,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	var settings = map[string]string{}
-	for _, v := range *environmentVariables {
+	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[v.Name] = v.Content
 	}
 
