@@ -93,7 +93,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			ServerName:           serverName,
 			Project:              project,
 			Service:              service,
-			EnvironmentVariables: &environmentVariables,
+			EnvironmentVariables: environmentVariables,
 		})
 
 	if nil != err {
