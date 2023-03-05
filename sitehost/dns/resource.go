@@ -62,7 +62,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	client := dns.New(conf.Client)
-	response, err := client.GetZone(ctx, dns.GetZoneRequest{DomainName: fmt.Sprint(d.Id())})
+	response, err := client.GetZone(ctx, dns.GetZoneRequest{DomainName: d.Id()})
 	if err != nil {
 		return diag.Errorf("Error retrieving domain: %s", err)
 	}
@@ -73,7 +73,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 
 	// iterate over the domains to find the one we are looking for.
 	for _, domain := range response.Return {
-		if domain.Name == fmt.Sprint(d.Id()) {
+		if domain.Name == d.Id() {
 			if err := d.Set("name", domain.Name); err != nil {
 				return diag.FromErr(err)
 			}
@@ -145,6 +145,8 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	if !resp.Status {
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
+
+	d.SetId(domainRecord)
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 
