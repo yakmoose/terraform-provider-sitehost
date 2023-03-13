@@ -4,8 +4,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-<<<<<<<< HEAD:sitehost/dns/schema_resource.go
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"	"github.com/sitehostnz/gosh/pkg/utils"
 )
 
 // resourceZoneSchema is the schema with values for a DNS zone resource.
@@ -21,13 +20,6 @@ var resourceZoneSchema = map[string]*schema.Schema{
 
 // resourceRecordSchema is the schema with values for a DNS record resource.
 var resourceRecordSchema = map[string]*schema.Schema{
-========
-	"github.com/sitehostnz/gosh/pkg/utils"
-)
-
-// dnsRecordResourceSchema is the schema with values for a Server resource.
-var dnsRecordResourceSchema = map[string]*schema.Schema{
->>>>>>>> 328c270 (refactoring and tidy up work for zones, env, stacks):sitehost/dns/dnsrecord_schema_resource.go
 	"domain": {
 		Type:         schema.TypeString,
 		Required:     true,
