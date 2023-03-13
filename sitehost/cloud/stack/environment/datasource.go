@@ -3,12 +3,14 @@ package environment
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
+// DataSource is the datasource for environments.
 func DataSource() *schema.Resource {
 	recordSchema := stackDataSourceSchema()
 	return &schema.Resource{
@@ -17,6 +19,7 @@ func DataSource() *schema.Resource {
 	}
 }
 
+// readDataSource reads the environment.
 func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -41,7 +44,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error retrieving environment info: %s", err)
 	}
 
-	var settings = map[string]string{}
+	settings := map[string]string{}
 	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[v.Name] = v.Content
 	}

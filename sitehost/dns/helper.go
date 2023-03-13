@@ -1,11 +1,12 @@
 package dns
 
 import (
+	"log"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/gosh/pkg/utils"
-	"log"
-	"strconv"
 )
 
 func updateRecordResource(d *schema.ResourceData, domainRecord *models.DNSRecord) {

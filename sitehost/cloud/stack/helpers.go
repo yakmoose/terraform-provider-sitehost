@@ -1,8 +1,9 @@
 package stack
 
 import (
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"strings"
+
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
 func extractLabelValueFromList(list []string, label string) (ret string) {

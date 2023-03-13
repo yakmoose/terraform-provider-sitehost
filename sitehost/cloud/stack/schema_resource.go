@@ -7,7 +7,6 @@ import (
 
 // resourceSchema returns a schema with the function to read stack resource.
 var resourceSchema = map[string]*schema.Schema{
-
 	"name": {
 		Type:        schema.TypeString,
 		Computed:    true,
@@ -23,7 +22,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Description: "The Stack label",
 	},
 
-	// this is a create option, and exists against an individual container
+	// this is a create option, and exists against an individual container.
 	"enable_ssl": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -31,7 +30,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Default:     false,
 	},
 
-	// These options are used to create the docker_file
+	// These options are used to create the docker_file.
 	"monitored": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -67,14 +66,14 @@ var resourceSchema = map[string]*schema.Schema{
 		}, false),
 	},
 
-	// this likely has rules in the main sh api around custom vs sh containers
+	// this likely has rules in the main sh api around custom vs sh containers.
 	"image_update": {
 		Type:     schema.TypeBool,
 		Optional: true,
 		Default:  true,
 	},
 
-	//virtual hosts are called aliases in the sh UI
+	// virtual hosts are called aliases in the sh UI.
 	"aliases": {
 		Type:     schema.TypeList,
 		Optional: true,
@@ -89,7 +88,7 @@ var resourceSchema = map[string]*schema.Schema{
 	"docker_file": {
 		Type:        schema.TypeString,
 		Computed:    true,
-		Description: "The docker compose file as returned from the server, that we have generated on create and bundles thigns together",
+		Description: "The docker compose file as returned from the server, that we have generated on create and bundles things together",
 	},
 
 	"expose": {
@@ -111,7 +110,7 @@ var resourceSchema = map[string]*schema.Schema{
 		},
 	},
 
-	// server properties, can't change these, informational only
+	// server properties, can't change these, informational only.
 	"server_name": {
 		Type:        schema.TypeString,
 		Required:    true,
@@ -133,9 +132,9 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 
 	// need to clean this  up... whooooo
-	//"containers": {
+	// "containers": {
 	//	Type:     schema.TypeList,
 	//	Computed: true,
 	//	Optional: false,
-	//},
+	// },
 }

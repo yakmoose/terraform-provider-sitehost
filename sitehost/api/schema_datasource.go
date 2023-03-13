@@ -1,4 +1,4 @@
-package api_info
+package api
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

@@ -3,6 +3,10 @@ package stack
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
@@ -10,9 +14,6 @@ import (
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"gopkg.in/yaml.v3"
-	"log"
-	"strconv"
-	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -44,7 +45,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	stackClient := stack.New(conf.Client)
 	stackResponse, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
 	if err != nil {
-		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, stackResponse.Stack, err)
+		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, name, err)
 	}
 
 	stack := stackResponse.Stack
@@ -63,9 +64,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	environmentClient := environment.New(conf.Client)
 	environmentVariablesResponse, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
 	if err != nil {
-		return diag.Errorf("Error retrieving environment info: server %s, stack %s, %s", serverName, stack, err)
+		return diag.Errorf("Error retrieving environment info: server %s, stack %s, %s", serverName, name, err)
 	}
-	var settings = map[string]string{}
+	settings := map[string]string{}
 	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[v.Name] = v.Content
 	}
@@ -90,7 +91,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	for i := range dockerFile.Services[stack.Name].Environment {
 		s := dockerFile.Services[stack.Name].Environment[i]
 		if strings.HasPrefix(s, "VIRTUAL_HOST=") {
-
 			aliases = strings.Split(
 				strings.TrimPrefix(s, "VIRTUAL_HOST="),
 				",",
@@ -157,7 +157,6 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	stackClient := stack.New(conf.Client)
 
-	//1. get a stack container id
 	stackNameResponse, err := stackClient.GenerateName(ctx)
 	if err != nil {
 		return diag.Errorf("Failed to generate stack name: %s", err)
@@ -165,11 +164,8 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	serverName := d.Get("server_name").(string)
 	name := stackNameResponse.Return.Name
 
-	//2. we need to congfiure the docker file
-	//3. we need to rollllll out the variables
-
 	settings := d.Get("settings").(map[string]string)
-	environmentVariables := make([]models.EnvironmentVariable, len(settings))
+	environmentVariables := make([]models.EnvironmentVariable, 0, len(settings))
 	for environmentVariableName, content := range settings {
 		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: environmentVariableName, Content: content})
 	}
@@ -180,7 +176,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		Label:                d.Get("label").(string),
 		EnableSSL:            0,
 		DockerCompose:        "",
-		EnvironmentVariables: nil,
+		EnvironmentVariables: environmentVariables,
 	}
 	log.Printf("[INFO] stack.addRequest: %s", addRequest)
 
@@ -194,26 +190,26 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // updateResource is a function to update a stack environment.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	//}
+	// conf, ok := meta.(*helper.CombinedConfig)
+	// if !ok {
+	// 	return diag.Errorf("failed to convert meta object")
+	// }
 
-	//client := domain.New(conf.Client)
-	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
+	// client := domain.New(conf.Client)
+	// domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
 
 	return nil
 }
 
 // deleteResource is a function to delete a stack environment.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	//}
+	// conf, ok := meta.(*helper.CombinedConfig)
+	// if !ok {
+	// 	return diag.Errorf("failed to convert meta object")
+	// }
 	//
-	//client := domain.New(conf.Client)
-	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
+	// client := domain.New(conf.Client)
+	// domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
 
 	return nil
 }
@@ -230,13 +226,12 @@ func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*sche
 
 	err := d.Set("server_name", serverName)
 	if err != nil {
-		return nil, fmt.Errorf("error importing stack: server %s, name %s", serverName, name, err)
+		return nil, fmt.Errorf("error importing stack: server %s, name %s, %s", serverName, name, err)
 	}
 
-	//
 	err = d.Set("name", name)
 	if err != nil {
-		return nil, fmt.Errorf("error importing stack environment: server %s, name %s, service %s, %s", serverName, name, err)
+		return nil, fmt.Errorf("error importing stack environment: server %s, name %s, %s", serverName, name, err)
 	}
 
 	return []*schema.ResourceData{d}, nil

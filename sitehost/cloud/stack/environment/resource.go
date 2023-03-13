@@ -3,12 +3,13 @@ package environment
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -19,7 +20,7 @@ func Resource() *schema.Resource {
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
 
-		//assume this is correct here.... wheeeee
+		// assume this is correct here.... wheeeee
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
@@ -48,7 +49,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("Error retrieving environment info: %s", err)
 	}
 
-	var settings = map[string]string{}
+	settings := map[string]string{}
 	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[strings.ToUpper(v.Name)] = v.Content
 	}
@@ -62,7 +63,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-// updateResource is a function to update a stack environment, there is no create environemnt outside of when you create a stack, these all work on the assumption that the stack exists.
+// updateResource is a function to update a stack environment, there is no create environment outside of when you create a stack, these all work on the assumption that the stack exists.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -73,12 +74,12 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	project := d.Get("project").(string)
 	service := d.Get("service").(string)
 
-	if "" == service {
+	if service == "" {
 		service = project
 	}
 
 	settings := d.Get("settings").(map[string]interface{})
-	var environmentVariables = []models.EnvironmentVariable{}
+	environmentVariables := []models.EnvironmentVariable{}
 	for k, v := range settings {
 		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: k, Content: v.(string)})
 	}
@@ -108,7 +109,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // deleteResource is a function to delete a stack environment.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	// how do we delete/destry...
 	return nil
 }

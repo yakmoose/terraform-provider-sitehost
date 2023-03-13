@@ -27,8 +27,8 @@ func databaseDataSourceSchema() map[string]*schema.Schema {
 			Description: "The container where backups are stored",
 			Computed:    true,
 		},
-		//"grants": {
+		// "grants": {
 		//
-		//},
+		// },
 	}
 }

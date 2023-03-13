@@ -1,21 +1,21 @@
-// Package server provides the functions to create a Server resource via SiteHost API.
 package dns
 
 import (
 	"context"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/gosh/pkg/utils"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-	"log"
-	"strconv"
-	"strings"
 )
 
-// DNSRecordResource returns a schema with the operations for Server resource.
-func DNSRecordResource() *schema.Resource {
+// RecordResource returns a schema with the operations for Server resource.
+func RecordResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: dnsRecordCreateResource,
 		ReadContext:   dnsRecordReadResource,
@@ -63,7 +63,6 @@ func dnsRecordCreateResource(ctx context.Context, d *schema.ResourceData, meta i
 			Content:  content,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("Error creating domain_record: %s", err)
 	}
@@ -72,7 +71,7 @@ func dnsRecordCreateResource(ctx context.Context, d *schema.ResourceData, meta i
 	if domainRecord == nil || err != nil {
 		return diag.Errorf("Could not find new record: %s", err)
 	}
-	// need to reaed the record back, and granb an id.
+	// need to read the record back, and granb an id.
 	// or we need to start generating an id based on name/type/content
 	updateRecordResource(d, domainRecord)
 
@@ -123,7 +122,6 @@ func dnsRecordDeleteResource(ctx context.Context, d *schema.ResourceData, meta i
 	id := d.Id()
 
 	_, err := client.DeleteRecord(ctx, dns.DeleteRecordRequest{Domain: domain, RecordID: id})
-
 	if err != nil {
 		return diag.Errorf("Error deleting domain record: %s", err)
 	}
@@ -155,7 +153,6 @@ func dnsRecordUpdateResource(ctx context.Context, d *schema.ResourceData, meta i
 			Priority: strconv.Itoa(d.Get("priority").(int)),
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("Error updating domain record: %s", err)
 	}
@@ -167,7 +164,6 @@ func dnsRecordUpdateResource(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func importResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-
 	if strings.Contains(d.Id(), "/") {
 		s := strings.Split(d.Id(), "/")
 		d.SetId(s[1])

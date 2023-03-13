@@ -1,17 +1,17 @@
-// Package server provides the functions to create a Server resource via SiteHost API.
 package dns
 
 import (
 	"context"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-	"log"
 )
 
-// Resource returns a schema with the operations for Server resource.
-func DNSZoneResource() *schema.Resource {
+// ZoneResource returns a schema with the operations for Server resource.
+func ZoneResource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: dnsZoneCreateResource,
 		ReadContext:   dnsZoneReadResource,
@@ -34,7 +34,6 @@ func dnsZoneCreateResource(ctx context.Context, d *schema.ResourceData, meta int
 
 	client := dns.New(conf.Client)
 	_, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domainName})
-
 	if err != nil {
 		return diag.Errorf("Error creating domain: %s", err)
 	}
@@ -46,7 +45,7 @@ func dnsZoneCreateResource(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-// readResource is a function to read a new Server resource.
+// dnsZoneReadResource is a function to read a new Server resource.
 func dnsZoneReadResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -55,7 +54,6 @@ func dnsZoneReadResource(ctx context.Context, d *schema.ResourceData, meta inter
 
 	client := dns.New(conf.Client)
 	domainResponse, err := client.GetZone(ctx, dns.GetZoneRequest{DomainName: d.Id()})
-
 	if err != nil {
 		return diag.Errorf("Error retrieving domain: %s", err)
 	}
@@ -64,7 +62,7 @@ func dnsZoneReadResource(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.Errorf("Failed retrieving domain: %s", err)
 	}
 
-	//domain := domainResponse.Return
+	// domain := domainResponse.Return
 	d.SetId(d.Id())
 	d.Set("name", d.Id())
 
@@ -73,7 +71,7 @@ func dnsZoneReadResource(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-// deleteResource is a function to delete a new Server resource.
+// dnsZoneDeleteResource is a function to delete a new Server resource.
 func dnsZoneDeleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -82,7 +80,6 @@ func dnsZoneDeleteResource(ctx context.Context, d *schema.ResourceData, meta int
 
 	client := dns.New(conf.Client)
 	_, err := client.DeleteZone(ctx, dns.DeleteZoneRequest{DomainName: d.Id()})
-
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
 	}

@@ -7,7 +7,6 @@ import (
 // stackDataSourceSchema is the schema with values for a cloud stack resource.
 func stackDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-
 		"name": {
 			Type:        schema.TypeString,
 			Required:    true,
@@ -63,7 +62,7 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 		"docker_file": {
 			Computed:    true,
 			Type:        schema.TypeString,
-			Description: "The docker compose file as returned from the server, that we have generated on create and bundles thigns together",
+			Description: "The docker compose file as returned from the server, that we have generated on create and bundles things together",
 		},
 
 		"expose": {

@@ -53,9 +53,9 @@ func New(version string) func() *schema.Provider {
 				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server":     server.Resource(),
-				"sitehost_dns_zone":   dns.ZoneResource(),
-				"sitehost_dns_record": dns.RecordResource(),
+				"sitehost_server":            server.Resource(),
+				"sitehost_dns_zone":          dns.ZoneResource(),
+				"sitehost_dns_record":        dns.RecordResource(),
 				"sitehost_ssh_key":    sshkey.Resource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
