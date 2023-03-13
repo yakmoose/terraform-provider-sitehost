@@ -102,5 +102,10 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Description: "The server IP address",
 		},
+		"server_id": {
+			Computed:    true,
+			Type:        schema.TypeString,
+			Description: "The Server id where the stack lives",
+		},
 	}
 }
