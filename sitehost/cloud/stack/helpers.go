@@ -1,7 +1,6 @@
 package stack
 
 import (
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"strings"
 
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"

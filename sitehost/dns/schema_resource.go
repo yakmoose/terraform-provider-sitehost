@@ -1,6 +1,8 @@
 package dns
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 <<<<<<<< HEAD:sitehost/dns/schema_resource.go
@@ -21,7 +23,6 @@ var resourceZoneSchema = map[string]*schema.Schema{
 var resourceRecordSchema = map[string]*schema.Schema{
 ========
 	"github.com/sitehostnz/gosh/pkg/utils"
-	"strings"
 )
 
 // dnsRecordResourceSchema is the schema with values for a Server resource.
@@ -42,7 +43,6 @@ var dnsRecordResourceSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
 		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-
 			domain := d.Get("domain").(string)
 
 			oldValue = utils.ConstructFqdn(oldValue, domain)

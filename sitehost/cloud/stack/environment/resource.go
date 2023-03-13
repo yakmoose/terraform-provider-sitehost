@@ -11,7 +11,6 @@ import (
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -76,7 +75,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	project := d.Get("project").(string)
 	service := d.Get("service").(string)
 
-	if "" == service {
+	if service == "" {
 		service = project
 	}
 
