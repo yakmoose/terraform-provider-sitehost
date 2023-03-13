@@ -47,8 +47,9 @@ func New(version string) func() *schema.Provider {
 			DataSourcesMap: map[string]*schema.Resource{
 				"sitehost_server": server.DataSource(),
 				"sitehost_api":    api_info.DataSource(),
-				"sitehost_stack":  stack.DataSource(),
 				"sitehost_ssh_key": sshkey.DataSource(),
+				"sitehost_cloud_database":    db.DataSource(),
+				"sitehost_stack":  stack.DataSource(),
 				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
@@ -58,6 +59,7 @@ func New(version string) func() *schema.Provider {
 				"sitehost_ssh_key":    sshkey.Resource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
+				"sitehost_cloud_database":    db.Resource(),
 			},
 		}
 

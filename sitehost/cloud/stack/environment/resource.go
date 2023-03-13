@@ -14,7 +14,7 @@ import (
 // Resource returns a schema with the operations for Server resource.
 func Resource() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: createResource,
+		CreateContext: updateResource,
 		ReadContext:   readResource,
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
@@ -25,31 +25,6 @@ func Resource() *schema.Resource {
 		},
 		Schema: resourceSchema,
 	}
-}
-
-// createResource is a function to create a stack environment.
-func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	//}
-	//
-	//client := domain.New(conf.Client)
-	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
-	//
-	//if err != nil {
-	//	return diag.Errorf("Error creating domain: %s", err)
-	//}
-	//
-	//if domain == nil {
-	//	return diag.Errorf("Failed retrieving domain: %s", err)
-	//}
-	//
-	//d.SetId(domain.Name)
-	//
-	//log.Printf("[INFO] Domain Name: %s", d.Id())
-
-	return nil
 }
 
 // readResource is a function to read a stack environment.
@@ -87,7 +62,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-// updateResource is a function to update a stack environment.
+// updateResource is a function to update a stack environment, there is no create environemnt outside of when you create a stack, these all work on the assumption that the stack exists.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -122,6 +97,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("Error updating environment info: %s", err)
 	}
 
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
+
 	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
@@ -131,20 +108,13 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // deleteResource is a function to delete a stack environment.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	//}
-	//
-	//client := domain.New(conf.Client)
-	//domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
 
+	// how do we delete/destry...
 	return nil
 }
 
 func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
-
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[project]/[service]", d.Id())
 	}

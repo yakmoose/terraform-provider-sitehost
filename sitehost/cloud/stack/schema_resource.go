@@ -5,7 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-// resourceSchema returns a schema with the function to read Server resource.
+// resourceSchema returns a schema with the function to read stack resource.
 var resourceSchema = map[string]*schema.Schema{
 
 	"name": {
@@ -24,7 +24,6 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 
 	// this is a create option, and exists against an individual container
-	// when getting, not sure how we update
 	"enable_ssl": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -133,6 +132,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Description: "The server IP address",
 	},
 
+	// need to clean this  up... whooooo
 	//"containers": {
 	//	Type:     schema.TypeList,
 	//	Computed: true,
