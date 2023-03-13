@@ -86,7 +86,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := environment.New(conf.Client)
-	job, err := client.Update(
+	response, err := client.Update(
 		ctx,
 		environment.UpdateRequest{
 			ServerName:           serverName,
@@ -101,7 +101,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
-	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 		return diag.FromErr(err)
 	}
 

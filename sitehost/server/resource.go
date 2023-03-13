@@ -81,7 +81,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 
 	// wait for "Completed" status
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: res.Return.JobID, Type: "daemon"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: res.Return.JobID, Type: job.DaemonType}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -162,7 +162,7 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 		return diag.Errorf("Error upgrading server: %s", res.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: "daemon"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: job.DaemonType}); err != nil {
 
 		return diag.FromErr(err)
 	}
@@ -207,7 +207,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("Error deleting server: %s", resp.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: "daemon"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: job.DaemonType}); err != nil {
 		return diag.FromErr(err)
 	}
 

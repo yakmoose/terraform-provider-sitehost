@@ -71,7 +71,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	database := d.Get("name").(string)
 	container := d.Get("backup_container").(string)
 
-	job, err := client.Add(
+	response, err := client.Add(
 		ctx,
 		db.AddRequest{
 			ServerName: serverName,
@@ -86,7 +86,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
-	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -134,7 +134,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	mysqlHost := d.Get("mysql_host").(string)
 	database := d.Get("name").(string)
 
-	job, err := client.Delete(
+	response, err := client.Delete(
 		ctx,
 		db.DeleteRequest{
 			ServerName: serverName,
@@ -146,7 +146,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error removing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 		return diag.FromErr(err)
 	}
 
