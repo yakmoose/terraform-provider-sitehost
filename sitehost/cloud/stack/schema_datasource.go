@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// stackDataSourceSchema returns a schema with the function to read Server resource.
+// stackDataSourceSchema returns a schema with the function to read a stack resource.
 func stackDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 
@@ -21,11 +21,11 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 		},
 
 		// this is a create option, and is reflected in the docker file
-		//"enable_ssl": {
-		//	Type:        schema.TypeBool,
-		//	Required:    true,
-		//	Description: "Enable or disable SSL",
-		//},
+		"enable_ssl": {
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "Enable or disable SSL",
+		},
 
 		// These options are used to create the docker_file
 		"monitored": {
@@ -48,7 +48,7 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 		},
 
-		//virtual hosts are called aliases in the sh UI
+		// virtual hosts are called aliases in the sh UI
 		"aliases": {
 			Computed: true,
 			Type:     schema.TypeList,
@@ -56,10 +56,12 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 		},
+
 		"image": {
 			Computed: true,
 			Type:     schema.TypeString,
 		},
+
 		"docker_file": {
 			Computed:    true,
 			Type:        schema.TypeString,
@@ -75,8 +77,6 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 		},
 
 		// questions, is the volumes standard? or comes from elsewhere? ports etc...
-		//
-
 		// this will be an abstraction on top of the other schema stuff
 		// since we can add them when creating, but updating does not change these
 		"settings": {

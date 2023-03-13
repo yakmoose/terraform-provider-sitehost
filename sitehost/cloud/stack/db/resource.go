@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
+	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -71,7 +72,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	database := d.Get("name").(string)
 	container := d.Get("backup_container").(string)
 
-	jobResponse, err := client.Add(
+	job, err := client.Add(
 		ctx,
 		db.AddRequest{
 			ServerName: serverName,
@@ -80,13 +81,14 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Container:  container,
 		},
 	)
+
 	if err != nil {
-		return diag.Errorf("error retrieving db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
+		return diag.Errorf("error retrieving db: server %s, name %s, database %s, err", serverName, mysqlHost, database, err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -95,6 +97,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // updateResource is a function to update a stack environment.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -115,8 +118,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Container:  container,
 		},
 	)
+
 	if err != nil {
-		return diag.Errorf("error updating db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
+		return diag.Errorf("error updating db: server %s, name %s, database %s, err", serverName, mysqlHost, database, err)
 	}
 
 	return nil
@@ -134,7 +138,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	mysqlHost := d.Get("mysql_host").(string)
 	database := d.Get("name").(string)
 
-	jobResponse, err := client.Delete(
+	job, err := client.Delete(
 		ctx,
 		db.DeleteRequest{
 			ServerName: serverName,
@@ -142,11 +146,12 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Database:   database,
 		},
 	)
+
 	if err != nil {
-		return diag.Errorf("error removing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
+		return diag.Errorf("error removing db: server %s, name %s, database %s, err", serverName, mysqlHost, database, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: jobResponse.Return.JobID, Type: "scheduler"}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.Return.JobID); err != nil {
 		return diag.FromErr(err)
 	}
 

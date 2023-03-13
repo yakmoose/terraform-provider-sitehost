@@ -14,6 +14,9 @@ import (
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"gopkg.in/yaml.v3"
+	"log"
+	"strconv"
+	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -94,6 +97,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	for i := range dockerFile.Services[stack.Name].Environment {
 		s := dockerFile.Services[stack.Name].Environment[i]
 		if strings.HasPrefix(s, "VIRTUAL_HOST=") {
+
 			aliases = strings.Split(
 				strings.TrimPrefix(s, "VIRTUAL_HOST="),
 				",",
@@ -160,12 +164,16 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	stackClient := stack.New(conf.Client)
 
+	//1. get a stack container id
 	stackNameResponse, err := stackClient.GenerateName(ctx)
 	if err != nil {
 		return diag.Errorf("Failed to generate stack name: %s", err)
 	}
 	serverName := d.Get("server_name").(string)
 	name := stackNameResponse.Return.Name
+
+	//2. we need to congfiure the docker file
+	//3. we need to rollllll out the variables
 
 	settings := d.Get("settings").(map[string]string)
 	environmentVariables := make([]models.EnvironmentVariable, 0, len(settings))

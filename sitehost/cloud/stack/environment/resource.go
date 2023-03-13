@@ -117,7 +117,6 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
-
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[project]/[service]", d.Id())
 	}
