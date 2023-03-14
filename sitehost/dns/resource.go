@@ -126,21 +126,17 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	domainRecord := models.DNSRecord{
-		Name:     fmt.Sprintf("%v", d.Get("name")),
-		Domain:   fmt.Sprintf("%v", d.Get("domain")),
-		Type:     fmt.Sprintf("%v", d.Get("type")),
-		Content:  fmt.Sprintf("%v", d.Get("record")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
-	}
+	domain := fmt.Sprintf("%v", d.Get("domain"))
+	name := fmt.Sprintf("%v", d.Get("name"))
+	domainRecord := helper.ConstructFqdn(name, domain)
 
 	client := dns.New(conf.Client)
 	resp, err := client.AddRecord(ctx, dns.AddRecordRequest{
-		Domain:   domainRecord.Domain,
-		Type:     domainRecord.Type,
-		Name:     domainRecord.Name,
-		Content:  domainRecord.Content,
-		Priority: domainRecord.Priority,
+		Domain:   domain,
+		Type:     fmt.Sprintf("%v", d.Get("type")),
+		Name:     domainRecord,
+		Content:  fmt.Sprintf("%v", d.Get("content")),
+		Priority: fmt.Sprintf("%v", d.Get("priority")),
 	})
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
