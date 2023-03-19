@@ -26,9 +26,9 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project

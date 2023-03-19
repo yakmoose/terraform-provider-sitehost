@@ -3,8 +3,9 @@ package environment
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
+
+	"github.com/sitehostnz/gosh/pkg/api/job"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,9 +37,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project
@@ -71,9 +72,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	project := d.Get("project").(string)
-	service := d.Get("service").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	project := fmt.Sprintf("%v", d.Get("project"))
+	service := fmt.Sprintf("%v", d.Get("service"))
 
 	if service == "" {
 		service = project

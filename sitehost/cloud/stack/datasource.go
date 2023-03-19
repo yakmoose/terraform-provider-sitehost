@@ -3,6 +3,7 @@ package stack
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -30,8 +31,8 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := stack.New(conf.Client)
 
 	resp, err := client.Get(ctx, stack.GetRequest{
-		ServerName: d.Get("server_name").(string),
-		Name:       d.Get("name").(string),
+		ServerName: fmt.Sprintf("%v", d.Get("server_name")),
+		Name:       fmt.Sprintf("%v", d.Get("name")),
 	})
 	if err != nil {
 		return diag.Errorf("Error retrieving api info: %s", err)

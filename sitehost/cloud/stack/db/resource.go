@@ -3,8 +3,9 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
+
+	"github.com/sitehostnz/gosh/pkg/api/job"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -36,9 +37,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
 
 	response, err := client.Get(
 		ctx,
@@ -66,10 +67,10 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
-	container := d.Get("backup_container").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
+	container := fmt.Sprintf("%v", d.Get("backup_container"))
 
 	response, err := client.Add(
 		ctx,
@@ -101,10 +102,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
-	container := d.Get("backup_container").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
+	container := fmt.Sprintf("%v", d.Get("backup_container"))
 
 	_, err := client.Update(
 		ctx,
@@ -130,9 +131,9 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := d.Get("server_name").(string)
-	mysqlHost := d.Get("mysql_host").(string)
-	database := d.Get("name").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("name"))
 
 	response, err := client.Delete(
 		ctx,

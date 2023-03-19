@@ -39,8 +39,8 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := d.Get("server_name").(string)
-	name := d.Get("name").(string)
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	name := fmt.Sprintf("%v", d.Get("name"))
 
 	stackClient := stack.New(conf.Client)
 	stackResponse, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
@@ -164,7 +164,8 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	if err != nil {
 		return diag.Errorf("Failed to generate stack name: %s", err)
 	}
-	serverName := d.Get("server_name").(string)
+
+	serverName := fmt.Sprintf("%v", d.Get("server_name"))
 	name := stackNameResponse.Return.Name
 
 	settings := d.Get("settings").(map[string]string)
@@ -176,7 +177,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	addRequest := stack.AddRequest{
 		ServerName:           serverName,
 		Name:                 name,
-		Label:                d.Get("label").(string),
+		Label:                fmt.Sprintf("%v", d.Get("label")),
 		EnableSSL:            0,
 		DockerCompose:        "",
 		EnvironmentVariables: environmentVariables,
