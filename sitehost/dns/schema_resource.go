@@ -1,8 +1,6 @@
 package dns
 
 import (
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -38,14 +36,12 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"type": {
 		Type:     schema.TypeString,
 		Required: true,
-		ForceNew: true,
 		ValidateFunc: validation.StringInSlice([]string{
 			"A",
 			"AAAA",
 			"CAA",
 			"CNAME",
 			"MX",
-			"NS",
 			"TXT",
 			"SRV",
 		}, false),
@@ -60,24 +56,9 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		Default:      0,
 	},
 
-	"ttl": {
-		Type:         schema.TypeInt,
-		Optional:     true,
-		Computed:     true,
-		ValidateFunc: validation.IntAtLeast(1),
-	},
-
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
-			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
-		},
-	},
-
-	"fqdn": {
-		Type:     schema.TypeString,
-		Computed: true,
 	},
 
 	"change_date": {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -84,7 +85,6 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	return diag.Errorf("Error finding the domain")
 }
 
-// deleteResource is a function to delete a new DNS resource.
 func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -126,17 +126,20 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	domainRecord := models.DNSRecord{
-	domain := fmt.Sprintf("%v", d.Get("domain"))
-	name := fmt.Sprintf("%v", d.Get("name"))
-	domainRecord := helper.ConstructFqdn(name, domain)
+		Name:     fmt.Sprintf("%v", d.Get("name")),
+		Domain:   fmt.Sprintf("%v", d.Get("domain")),
+		Type:     fmt.Sprintf("%v", d.Get("type")),
+		Content:  fmt.Sprintf("%v", d.Get("record")),
+		Priority: fmt.Sprintf("%v", d.Get("priority")),
+	}
 
 	client := dns.New(conf.Client)
 	resp, err := client.AddRecord(ctx, dns.AddRecordRequest{
-		Domain:   domain,
-		Type:     fmt.Sprintf("%v", d.Get("type")),
-		Name:     domainRecord,
-		Content:  fmt.Sprintf("%v", d.Get("record")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
+		Domain:   domainRecord.Domain,
+		Type:     domainRecord.Type,
+		Name:     domainRecord.Name,
+		Content:  domainRecord.Content,
+		Priority: domainRecord.Priority,
 	})
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
@@ -146,7 +149,14 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
-	d.SetId(domainRecord)
+	record, err := client.GetRecordWithRecord(ctx, domainRecord)
+	if err != nil {
+		return diag.Errorf("Error creating DNS record: %s", err)
+	}
+
+	if err := setRecordAttributes(d, record); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 
@@ -287,5 +297,9 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 		return err
 	}
 
-	return d.Set("change_date", record.ChangeDate)
+	if err := d.Set("change_date", record.ChangeDate); err != nil {
+		return err
+	}
+
+	return nil
 }
