@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 ### Updated
 - Updated GoSH version to v0.3.4.
 
-## [v1.1.0] 2023-03-27
+## [v1.1.0] 2023-03-22
 ### Added
 - Added `sitehost_dns_zone` resource.
 - Added `sitehost_dns_record` resource.
