@@ -85,6 +85,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	return diag.Errorf("Error finding the domain")
 }
 
+// deleteZoneResource is a function to delete a DNS Zone.
 func deleteZoneResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -297,9 +298,5 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 		return err
 	}
 
-	if err := d.Set("change_date", record.ChangeDate); err != nil {
-		return err
-	}
-
-	return nil
+	return d.Set("change_date", record.ChangeDate)
 }
