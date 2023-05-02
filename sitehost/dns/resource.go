@@ -155,7 +155,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
 
-	if err := setRecordAttributes(d, record); err != nil {
+	if err := setRecordAttributes(d, *record); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -174,7 +174,7 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	resp, err := client.GetRecord(ctx, dns.RecordRequest{
+	record, err := client.GetRecord(ctx, dns.RecordRequest{
 		ID:         d.Id(),
 		DomainName: domain,
 	})
@@ -182,7 +182,7 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.Errorf("Error retrieving DNS zone: %s", err)
 	}
 
-	if err := setRecordAttributes(d, resp); err != nil {
+	if err := setRecordAttributes(d, *record); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -247,7 +247,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
 
-	if err := setRecordAttributes(d, record); err != nil {
+	if err := setRecordAttributes(d, *record); err != nil {
 		return diag.FromErr(err)
 	}
 

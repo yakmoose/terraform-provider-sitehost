@@ -44,6 +44,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 			"MX",
 			"TXT",
 			"SRV",
+			"NS", // added this back, as creating a zone does not appear to set the DNS records
 		}, false),
 		Description: "The record type",
 	},
