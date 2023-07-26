@@ -20,3 +20,13 @@ func First[T any](ss []T, test func(T) bool) (ret T) {
 	}
 	return
 }
+
+// Has checks if the collection has the item.
+func Has[T any](ss []T, test func(T) bool) (ret bool) {
+	for _, s := range ss {
+		if test(s) {
+			ret = true
+		}
+	}
+	return
+}
