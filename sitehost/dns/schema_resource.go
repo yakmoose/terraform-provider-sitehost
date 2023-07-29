@@ -38,7 +38,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 			domain := fmt.Sprintf("%v", d.Get("domain"))
 
-			oldValue = utils.ConstructFqdn(oldValue, domain)
+			oldValue = utils.ConstructFqdn(fmt.Sprintf("%v.", oldValue), domain)
 			newValue = utils.ConstructFqdn(newValue, domain)
 
 			return newValue == oldValue

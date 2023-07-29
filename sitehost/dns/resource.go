@@ -4,6 +4,7 @@ package dns
 import (
 	"context"
 	"fmt"
+	"github.com/sitehostnz/gosh/pkg/utils"
 	"log"
 	"strconv"
 	"strings"
@@ -127,17 +128,26 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	name := fmt.Sprintf("%v", d.Get("name"))
-	domainRecord := helper.ConstructFqdn(name, domain)
+	name := utils.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
+
+	domainRecord := models.DNSRecord{
+		Name:     strings.TrimSuffix(name, "."),
+		Domain:   domain,
+		Content:  fmt.Sprintf("%v", d.Get("record")),
+		Type:     fmt.Sprintf("%v", d.Get("type")),
+		TTL:      fmt.Sprintf("%v", d.Get("ttl")),
+		Priority: fmt.Sprintf("%v", d.Get("priority")),
+	}
 
 	client := dns.New(conf.Client)
 	resp, err := client.AddRecord(ctx, dns.AddRecordRequest{
-		Domain:   domain,
-		Type:     fmt.Sprintf("%v", d.Get("type")),
-		Name:     domainRecord,
-		Content:  fmt.Sprintf("%v", d.Get("content")),
-		Priority: fmt.Sprintf("%v", d.Get("priority")),
+		Domain:   domainRecord.Domain,
+		Type:     domainRecord.Type,
+		Name:     domainRecord.Name,
+		Content:  domainRecord.Content,
+		Priority: domainRecord.Priority,
 	})
+
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -149,6 +159,10 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	record, err := client.GetRecordWithRecord(ctx, domainRecord)
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
+	}
+
+	if nil == record {
+		return diag.Errorf("Error creating DNS record, record not found: (%s,%s,%s,%s,%s)", domainRecord.Name, domainRecord.Type, domainRecord.Domain, domainRecord.Priority, domainRecord.Content)
 	}
 
 	if err := setRecordAttributes(d, *record); err != nil {
@@ -174,8 +188,15 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 		ID:         d.Id(),
 		DomainName: domain,
 	})
+
 	if err != nil {
-		return diag.Errorf("Error retrieving DNS zone: %s", err)
+		return diag.Errorf("Error retrieving DNS record: %s", err)
+	}
+
+	if record == nil {
+		log.Printf("[WARN] Record (%s,%s) not found, removing from state", d.Id(), domain)
+		d.SetId("")
+		return nil
 	}
 
 	if err := setRecordAttributes(d, *record); err != nil {
@@ -239,6 +260,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		ID:         d.Id(),
 		DomainName: fmt.Sprintf("%v", d.Get("domain")),
 	})
+
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}

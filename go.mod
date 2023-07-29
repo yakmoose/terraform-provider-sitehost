@@ -235,4 +235,8 @@ require (
 	mvdan.cc/unparam v0.0.0-20240427195214-063aff900ca1 // indirect
 )
 
-replace github.com/sitehostnz/gosh => github.com/yakmoose/gosh v0.0.0-20230726213234-105f4924d002
+// when doing a remote build
+// replace github.com/sitehostnz/gosh => github.com/yakmoose/gosh v0.0.0-20230726213234-105f4924d002
+
+// when doing a local/testing build
+replace github.com/sitehostnz/gosh => /Users/john/Projects/go/src/gosh
