@@ -9,11 +9,8 @@ import (
 var resourceSchema = map[string]*schema.Schema{
 	"name": {
 		Type:        schema.TypeString,
-		Computed:    true,
-		Optional:    false,
+		Required:    true,
 		Description: "The Stack name",
-		// name is computed... if we are creating
-		// not if we are importing
 	},
 
 	"label": {
@@ -53,7 +50,6 @@ var resourceSchema = map[string]*schema.Schema{
 		Optional: true,
 		Default:  false,
 	},
-
 	"restart": {
 		Type:     schema.TypeString,
 		Default:  "unless-stopped",
@@ -65,7 +61,6 @@ var resourceSchema = map[string]*schema.Schema{
 			"no",
 		}, false),
 	},
-
 	// this likely has rules in the main sh api around custom vs sh containers.
 	"image_update": {
 		Type:     schema.TypeBool,
@@ -87,8 +82,8 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 	"docker_file": {
 		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "The docker compose file as returned from the server, that we have generated on create and bundles things together",
+		Required:    true,
+		Description: "The docker compose file for the container",
 	},
 
 	"expose": {
@@ -130,11 +125,4 @@ var resourceSchema = map[string]*schema.Schema{
 		Optional:    false,
 		Description: "The server IP address",
 	},
-
-	// need to clean this  up... whooooo
-	// "containers": {
-	//	Type:     schema.TypeList,
-	//	Computed: true,
-	//	Optional: false,
-	// },
 }

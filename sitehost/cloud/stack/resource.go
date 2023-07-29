@@ -3,7 +3,6 @@ package stack
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
-	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"gopkg.in/yaml.v3"
 )
@@ -55,11 +53,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	d.Set("server_label", stack.Server)
 	d.Set("docker_file", stack.DockerFile)
 	d.Set("label", stack.Label)
-
-	// this is a nested fun time...
-	// d.Set("", stack.Containers)
-	// do we need to expose the containers in terraform? we have no real way of getting them
-	// or changing them... other than the docker file?
 
 	environmentClient := environment.New(conf.Client)
 	environmentVariablesResponse, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
@@ -153,36 +146,36 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 // createResource is a function to create a stack environment.
 func createResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	conf, ok := meta.(*helper.CombinedConfig)
-	if !ok {
-		return diag.Errorf("failed to convert meta object")
-	}
+	//conf, ok := meta.(*helper.CombinedConfig)
+	//if !ok {
+	//	return diag.Errorf("failed to convert meta object")
+	//}
 
-	stackClient := stack.New(conf.Client)
+	//stackClient := stack.New(conf.Client)
 
-	stackNameResponse, err := stackClient.GenerateName(ctx)
-	if err != nil {
-		return diag.Errorf("Failed to generate stack name: %s", err)
-	}
+	// name is simply required...
+	//stackNameResponse, err := stackClient.GenerateName(ctx)
+	//if err != nil {
+	//	return diag.Errorf("Failed to generate stack name: %s", err)
+	//}
+	//serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	//name := stackNameResponse.Return.Name
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	name := stackNameResponse.Return.Name
-
-	settings := d.Get("settings").(map[string]string)
-	environmentVariables := make([]models.EnvironmentVariable, 0, len(settings))
-	for environmentVariableName, content := range settings {
-		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: environmentVariableName, Content: content})
-	}
-
-	addRequest := stack.AddRequest{
-		ServerName:           serverName,
-		Name:                 name,
-		Label:                fmt.Sprintf("%v", d.Get("label")),
-		EnableSSL:            0,
-		DockerCompose:        "",
-		EnvironmentVariables: environmentVariables,
-	}
-	log.Printf("[INFO] stack.addRequest: %s", addRequest)
+	//settings := d.Get("settings").(map[string]string)
+	//environmentVariables := make([]models.EnvironmentVariable, 0, len(settings))
+	//for environmentVariableName, content := range settings {
+	//	environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: environmentVariableName, Content: content})
+	//}
+	//
+	//addRequest := stack.AddRequest{
+	//	ServerName:           serverName,
+	//	Name:                 name,
+	//	Label:                fmt.Sprintf("%v", d.Get("label")),
+	//	EnableSSL:            0,
+	//	DockerCompose:        "",
+	//	EnvironmentVariables: environmentVariables,
+	//}
+	//log.Printf("[INFO] stack.addRequest: %s", addRequest)
 
 	return diag.Errorf("giving up")
 	// set the id once we're actually happy...

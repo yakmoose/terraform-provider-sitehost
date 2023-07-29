@@ -55,9 +55,7 @@ func New(version string) func() *schema.Provider {
 				"sitehost_api":               api.DataSource(),
 				"sitehost_stack":             stack.DataSource(),
 
-				//"sitehost_dns_zone":          dns.ZoneD(),
-				//"sitehost_dns_record":        dns.RecordResource(),
-				//				"sitehost_stack_image":       image.DataSource(),
+				// "sitehost_stack_image":       image.DataSource(),
 
 				"sitehost_stack_database": db.DataSource(),
 				// stack_database_user
@@ -70,9 +68,7 @@ func New(version string) func() *schema.Provider {
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
 
-				//stack_id
-				// stack_docker_file
-
+				"sitehost_stack_name":        stack.NameResource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
 
