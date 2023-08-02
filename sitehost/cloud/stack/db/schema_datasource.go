@@ -27,8 +27,51 @@ func databaseDataSourceSchema() map[string]*schema.Schema {
 			Description: "The container where backups are stored",
 			Computed:    true,
 		},
-		// "grants": {
-		//
-		// },
+	}
+}
+
+// listDatabaseDataSourceSchema is the datasource for a listing of databases.
+func listDatabaseDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+
+		"databases": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "The list of databases",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"server_name": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The server name",
+					},
+					"server_id": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The server id",
+					},
+					"server_label": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The server label",
+					},
+					"mysql_host": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The mysqlhost",
+					},
+					"name": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "The database name",
+					},
+					"backup_container": {
+						Type:        schema.TypeString,
+						Description: "The container where backups are stored",
+						Computed:    true,
+					},
+				},
+			},
+		},
 	}
 }

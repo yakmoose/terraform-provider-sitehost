@@ -80,10 +80,25 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		service = project
 	}
 
-	settings := d.Get("settings").(map[string]interface{})
 	environmentVariables := []models.EnvironmentVariable{}
-	for k, v := range settings {
-		environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: k, Content: v.(string)})
+	if d.HasChange("settings") {
+		old, new := d.GetChange("settings")
+
+		// additions
+		for k, v := range new.(map[string]interface{}) {
+			ev := models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)}
+			if _, exists := old.(map[string]interface{})[k]; !exists {
+				environmentVariables = append(environmentVariables, ev)
+			}
+		}
+
+		// removals
+		for k, _ := range old.(map[string]interface{}) {
+			ev := models.EnvironmentVariable{Name: k, Content: ""}
+			if _, exists := new.(map[string]interface{})[k]; !exists {
+				environmentVariables = append(environmentVariables, ev)
+			}
+		}
 	}
 
 	client := environment.New(conf.Client)

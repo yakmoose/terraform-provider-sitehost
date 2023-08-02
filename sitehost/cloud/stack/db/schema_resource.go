@@ -29,6 +29,4 @@ var databaseResourceSchema = map[string]*schema.Schema{
 		Required:    true,
 		Description: "The container where backups are stored",
 	},
-
-	// grants here is problematic, since we can't create grants until after we have database
 }

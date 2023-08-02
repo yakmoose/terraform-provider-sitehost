@@ -236,7 +236,7 @@ require (
 )
 
 // when doing a remote build
-// replace github.com/sitehostnz/gosh => github.com/yakmoose/gosh v0.0.0-20230726213234-105f4924d002
+replace github.com/sitehostnz/gosh => github.com/yakmoose/gosh v0.0.0-20230802000957-ba74e1992d7b
 
 // when doing a local/testing build
-replace github.com/sitehostnz/gosh => /Users/john/Projects/go/src/gosh
+//replace github.com/sitehostnz/gosh => /Users/john/Projects/go/src/gosh

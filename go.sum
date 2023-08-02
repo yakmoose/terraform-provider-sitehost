@@ -843,6 +843,7 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 github.com/yagipy/maintidx v1.0.0 h1:h5NvIsCz+nRDapQ0exNv4aJ0yXSI0420omVANTv3GJM=
 github.com/yagipy/maintidx v1.0.0/go.mod h1:0qNf/I/CCZXSMhsRsrEPDZ+DkekpKLXAJfsTACwgXLk=
 github.com/yakmoose/gosh v0.0.0-20230726213234-105f4924d002/go.mod h1:dra8Cc6DfQU2NNzdFf0ObgZhvFdn9Pifq2FiPqEw/ls=
+github.com/yakmoose/gosh v0.0.0-20230802000957-ba74e1992d7b/go.mod h1:dra8Cc6DfQU2NNzdFf0ObgZhvFdn9Pifq2FiPqEw/ls=
 github.com/yeya24/promlinter v0.2.0 h1:xFKDQ82orCU5jQujdaD8stOHiv8UN68BSdn2a8u8Y3o=
 github.com/yeya24/promlinter v0.2.0/go.mod h1:u54lkmBOZrpEbQQ6gox2zWKKLKu2SGe+2KOiextY+IA=
 github.com/yeya24/promlinter v0.3.0/go.mod h1:cDfJQQYv9uYciW60QT0eeHlFodotkYZlL+YcPQN+mW4=

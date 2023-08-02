@@ -20,6 +20,8 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/grant"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/user"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
@@ -56,8 +58,11 @@ func New(version string) func() *schema.Provider {
 				"sitehost_stack":             stack.DataSource(),
 
 				// "sitehost_stack_image":       image.DataSource(),
+				"sitehost_cloud_database":       db.DataSource(),
+				"sitehost_cloud_databases":      db.ListDataSource(),
+				"sitehost_cloud_database_user":  db.DataSource(),
+				"sitehost_cloud_database_grant": grant.DataSource(),
 
-				"sitehost_stack_database": db.DataSource(),
 				// stack_database_user
 				// stack_database_grant
 
@@ -72,7 +77,10 @@ func New(version string) func() *schema.Provider {
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
 
-				"sitehost_cloud_database": db.Resource(),
+				"sitehost_cloud_database":       db.Resource(),
+				"sitehost_cloud_database_user":  user.Resource(),
+				"sitehost_cloud_database_grant": grant.Resource(),
+
 				// stack_database_user
 				// stack_database_grant
 
