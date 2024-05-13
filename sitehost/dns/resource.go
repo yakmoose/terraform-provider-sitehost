@@ -156,18 +156,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
-	record, err := client.GetRecordWithRecord(ctx, domainRecord)
-	if err != nil {
-		return diag.Errorf("Error creating DNS record: %s", err)
-	}
-
-	if nil == record {
-		return diag.Errorf("Error creating DNS record, record not found: (%s,%s,%s,%s,%s)", domainRecord.Name, domainRecord.Type, domainRecord.Domain, domainRecord.Priority, domainRecord.Content)
-	}
-
-	if err := setRecordAttributes(d, *record); err != nil {
-		return diag.FromErr(err)
-	}
+	d.SetId(resp.Return.ID)
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 
@@ -193,13 +182,13 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.Errorf("Error retrieving DNS record: %s", err)
 	}
 
-	if record == nil {
-		log.Printf("[WARN] Record (%s,%s) not found, removing from state", d.Id(), domain)
-		d.SetId("")
-		return nil
-	}
+	//if record == nil {
+	//	log.Printf("[WARN] Record (%s,%s) not found, removing from state", d.Id(), domain)
+	//	d.SetId("")
+	//	return nil
+	//}
 
-	if err := setRecordAttributes(d, *record); err != nil {
+	if err := setRecordAttributes(d, record); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -265,7 +254,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
 
-	if err := setRecordAttributes(d, *record); err != nil {
+	if err := setRecordAttributes(d, record); err != nil {
 		return diag.FromErr(err)
 	}
 
