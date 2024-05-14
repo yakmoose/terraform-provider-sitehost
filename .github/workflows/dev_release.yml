@@ -2,10 +2,10 @@ name: Dev Release
 
 on:
   workflow_dispatch:
-  inputs:
-    replaceMod:
-        description: 'Replace go.mod'
-        required: false
+    inputs:
+      replaceMod:
+          description: 'Replace go.mod'
+          required: false
 
 jobs:
   releaser:
@@ -24,7 +24,7 @@ jobs:
         name: Update go mod
         if: ${{ github.event.inputs.replaceMod != '' }}
         run: |
-            go mod edit -replace "github.com/sitehostnz/gosh"=>"${{ github.event.inputs.replaceMod }}"
+            go mod edit -replace "github.com/sitehostnz/gosh"="${{ github.event.inputs.replaceMod }}"
             go mod tidy
 
       -

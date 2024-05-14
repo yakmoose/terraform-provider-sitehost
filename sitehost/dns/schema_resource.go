@@ -49,6 +49,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"type": {
 		Type:     schema.TypeString,
 		Required: true,
+		ForceNew: true,
 		ValidateFunc: validation.StringInSlice([]string{
 			"A",
 			"AAAA",
@@ -80,11 +81,11 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"content": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
 			// bloody dots at the end of records...
 			// we have to do this, mainly for NS and CNAME records
 			// Possibly MX records too... hell, let's just do them all
-			return strings.TrimSuffix(oldValue, ".") == strings.TrimSuffix(newValue, ".")
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
 		},
 	},
 

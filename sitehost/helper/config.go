@@ -22,7 +22,7 @@ const (
 	// JobStatusFailed is the status for a failed job.
 	JobStatusFailed = "Failed"
 	// JobRequestDelay is the time wait to send a new request to check the job status.
-	JobRequestDelay = 10 * time.Second
+	JobRequestDelay = 1 * time.Second
 	// JobRequestTimeout is the time to wait before timeout.
 	JobRequestTimeout = 60 * time.Minute
 	// JobRequestMinTimeout is the minimum time to wait before refreshes.
