@@ -233,7 +233,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 			RecordID: d.Id(),
 			Type:     fmt.Sprintf("%v", d.Get("type")),
 			Name:     fmt.Sprintf("%v", d.Get("name")),
-			Content:  fmt.Sprintf("%v", d.Get("record")),
+			Content:  fmt.Sprintf("%v", d.Get("content")),
 			Priority: fmt.Sprintf("%v", d.Get("priority")),
 		},
 	)
@@ -284,6 +284,7 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	}
 
 	if err := d.Set("name", record.Name); err != nil {
+// 	} else {
 		return err
 	}
 

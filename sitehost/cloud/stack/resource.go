@@ -64,6 +64,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		settings[v.Name] = v.Content
 	}
 
+	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
+	d.Set("server_name", serverName)
+
 	if len(settings) > 0 {
 		d.Set("settings", settings)
 	}

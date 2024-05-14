@@ -16,7 +16,7 @@ func DataSource() *schema.Resource {
 	recordSchema := stackDataSourceSchema()
 
 	return &schema.Resource{
-		ReadContext: readDataSource,
+		ReadContext: readResource,
 		Schema:      recordSchema,
 	}
 }
@@ -43,10 +43,6 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	d.SetId(resp.Stack.Name)
-
-	if err := d.Set("server_id", resp.Stack.ServerID); err != nil {
-		return diag.FromErr(err)
-	}
 
 	if err := d.Set("label", resp.Stack.Label); err != nil {
 		return diag.FromErr(err)

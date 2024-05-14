@@ -19,7 +19,7 @@ Use the navigation to the left to read about the available resources.
 terraform {
   required_providers {
     sitehost = {
-      source = "sitehost/sitehost"
+      source = "sitehostnz/sitehost"
       version = "~> 1.0"
     }
   }
@@ -32,13 +32,19 @@ provider "sitehost" {
 	api_endpoint = "https://api.sitehost.nz/1.1/"
 }
 
-# Create a web server
+# Create an SSH Key
+resource "sitehost_ssh_key" "key" {
+    label = "My New SSH Key"
+    content = "ssh-rsa AAAAB3..."
+}
+
+# Create a web server with the SSH Key we just created
 resource "sitehost_server" "web" {
 	label = "webserver"
 	location = "AKLCITY"
 	product_code = "XENLIT"
 	image = "ubuntu-xenial.amd64"
-	ssh_keys = []
+	ssh_keys = [sitehost_ssh_key.key.content]
 }
 ```
 

@@ -17,14 +17,14 @@ description: |-
 
 ### Required
 
-- `image` (String)
-- `label` (String)
-- `location` (String)
-- `product_code` (String)
+- `image` (String) An Image ID to deploy the Disk from. The complete list of images ID you can see in our official documentation.
+- `label` (String) Each Server is assigned a single public IPv4 address upon creation.
+- `location` (String) This is the location where the Server was deployed. This cannot be changed without opening a support ticket.
+- `product_code` (String) The product code of the server to be deployed, determining the price and size.
 
 ### Optional
 
-- `name` (String)
+- `name` (String) The `name` is the ID and is provided for a Server.
 
 ### Read-Only
 

@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"fmt"
-
 	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
 
