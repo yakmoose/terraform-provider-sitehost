@@ -63,9 +63,6 @@ func New(version string) func() *schema.Provider {
 				"sitehost_cloud_database_user":  db.DataSource(),
 				"sitehost_cloud_database_grant": grant.DataSource(),
 
-				// stack_database_user
-				// stack_database_grant
-
 				"sitehost_stack_environment": environment.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
@@ -80,10 +77,6 @@ func New(version string) func() *schema.Provider {
 				"sitehost_cloud_database":       db.Resource(),
 				"sitehost_cloud_database_user":  user.Resource(),
 				"sitehost_cloud_database_grant": grant.Resource(),
-
-				// stack_database_user
-				// stack_database_grant
-
 			},
 		}
 
