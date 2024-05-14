@@ -5,7 +5,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"	"github.com/sitehostnz/gosh/pkg/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/sitehostnz/gosh/pkg/utils"
 )
 
 // resourceZoneSchema is the schema with values for a DNS zone resource.
