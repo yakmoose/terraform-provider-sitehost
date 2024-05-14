@@ -87,10 +87,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		// things that exist in new, need to be added or updated.
 		for k, v := range new.(map[string]interface{}) {
 			ev := models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)}
-			//if _, exists := old.(map[string]interface{})[k]; !exists {
-			//	environmentVariables = append(environmentVariables, ev)
-			//}
-
 			// if the content is different or does not exist, then we need to update it.
 			if old.(map[string]interface{})[k] != new.(map[string]interface{})[k] {
 				environmentVariables = append(environmentVariables, ev)
