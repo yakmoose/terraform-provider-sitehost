@@ -78,7 +78,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		ValidateFunc: validation.IntAtLeast(1),
 	},
 
-	"content": {
+	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
 		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {

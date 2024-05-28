@@ -10,11 +10,13 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/grant"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/user"
+	db_user "github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/user"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/environment"
+	ssh_user "github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/ssh/user"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
+	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 
 // New returns a schema.Provider for SiteHost.
@@ -40,30 +42,38 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_server": server.DataSource(),
-				"sitehost_api":    api.DataSource(),
-				"sitehost_stack":  stack.DataSource(),
+				"sitehost_api": api.DataSource(),
 
-				// "sitehost_stack_image":       image.DataSource(),
 				"sitehost_cloud_database":       db.DataSource(),
 				"sitehost_cloud_databases":      db.ListDataSource(),
-				"sitehost_cloud_database_user":  db.DataSource(),
 				"sitehost_cloud_database_grant": grant.DataSource(),
+				"sitehost_cloud_database_user":  db_user.DataSource(),
 
+				"sitehost_cloud_ssh_user": ssh_user.DataSource(),
+
+				"sitehost_server": server.DataSource(),
+
+				"sitehost_stack":             stack.DataSource(),
 				"sitehost_stack_environment": environment.DataSource(),
+
+				"sitehost_ssh_key": sshkey.DataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"sitehost_server":     server.Resource(),
+				"sitehost_cloud_database":       db.Resource(),
+				"sitehost_cloud_database_user":  db_user.Resource(),
+				"sitehost_cloud_database_grant": grant.Resource(),
+
+				"sitehost_cloud_ssh_user": ssh_user.Resource(),
+
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
+
+				"sitehost_server":  server.Resource(),
+				"sitehost_ssh_key": sshkey.Resource(),
 
 				"sitehost_stack_name":        stack.NameResource(),
 				"sitehost_stack":             stack.Resource(),
 				"sitehost_stack_environment": environment.Resource(),
-
-				"sitehost_cloud_database":       db.Resource(),
-				"sitehost_cloud_database_user":  user.Resource(),
-				"sitehost_cloud_database_grant": grant.Resource(),
 			},
 		}
 

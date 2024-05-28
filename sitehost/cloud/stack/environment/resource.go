@@ -65,7 +65,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-// updateResource is a function to update a stack environment, there is no create environment outside of when you create a stack, these all work on the assumption that the stack exists.
+// updateResource is a function to update a stack environment, there is no create environment outside creating a stack, these all work on the assumption that the stack exists.
 func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -82,22 +82,26 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	environmentVariables := []models.EnvironmentVariable{}
 	if d.HasChange("settings") {
-		old, new := d.GetChange("settings")
+		oldV, newV := d.GetChange("settings")
 
 		// things that exist in new, need to be added or updated.
-		for k, v := range new.(map[string]interface{}) {
-			ev := models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)}
+		for k, v := range newV.(map[string]interface{}) {
 			// if the content is different or does not exist, then we need to update it.
-			if old.(map[string]interface{})[k] != new.(map[string]interface{})[k] {
-				environmentVariables = append(environmentVariables, ev)
+			if oldV.(map[string]interface{})[k] != newV.(map[string]interface{})[k] {
+				environmentVariables = append(
+					environmentVariables,
+					models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)},
+				)
 			}
 		}
 
 		// removals - if something does not exist in the new map, then we need to remove it.
-		for k, _ := range old.(map[string]interface{}) {
-			ev := models.EnvironmentVariable{Name: k, Content: ""}
-			if _, exists := new.(map[string]interface{})[k]; !exists {
-				environmentVariables = append(environmentVariables, ev)
+		for k, _ := range oldV.(map[string]interface{}) {
+			if _, exists := newV.(map[string]interface{})[k]; !exists {
+				environmentVariables = append(
+					environmentVariables,
+					models.EnvironmentVariable{Name: k, Content: ""},
+				)
 			}
 		}
 	}
@@ -130,7 +134,33 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // deleteResource is a function to delete a stack environment.
 func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// how do we delete/destry...
+
+	//conf, ok := meta.(*helper.CombinedConfig)
+	//if !ok {
+	//	return diag.Errorf("failed to convert meta object")
+	//}
+	//
+	//client := environment.New(conf.Client)
+	//
+	//serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	//username := fmt.Sprintf("%v", d.Get("username"))
+	//
+	//response, err := client.Delete(
+	//	ctx,
+	//	environment.DeleteRequest{
+	//		ServerName: serverName,
+	//		Username:   username,
+	//	},
+	//)
+	//
+	//if err != nil {
+	//	return diag.Errorf("error retrieving ssh user: server %s, username %s, %s", serverName, username, err)
+	//}
+	//
+	//if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	//	return diag.FromErr(err)
+	//}
+
 	return nil
 }
 
