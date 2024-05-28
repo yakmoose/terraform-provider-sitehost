@@ -38,7 +38,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	opts := sshkey.CreateRequest{
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: fmt.Sprint(d.Get("custom_image_access")),
+		CustomImageAccess: d.Get("custom_image_access").(bool),
 	}
 
 	res, err := client.Create(ctx, opts)
@@ -93,6 +93,10 @@ func setData(res sshkey.GetResponse, d *schema.ResourceData) diag.Diagnostics {
 		return diag.FromErr(err)
 	}
 
+	if err := d.Set("custom_image_access", res.Return.CustomImageAccess); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
@@ -132,7 +136,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := sshkey.New(conf.Client)
 
-	if d.HasChange("label") || d.HasChange("content") {
+	if d.HasChange("label") || d.HasChange("content") || d.HasChange("custom_image_access") {
 		updateKey(client, d)
 	}
 
@@ -145,7 +149,7 @@ func updateKey(client *sshkey.Client, d *schema.ResourceData) diag.Diagnostics {
 		ID:                d.Id(),
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: fmt.Sprint(d.Get("custom_image_access")),
+		CustomImageAccess: d.Get("custom_image_access").(bool),
 	})
 	if err != nil {
 		return diag.Errorf("Error updating SSH Key: %s", err)

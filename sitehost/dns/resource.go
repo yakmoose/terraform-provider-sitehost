@@ -182,12 +182,6 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.Errorf("Error retrieving DNS record: %s", err)
 	}
 
-	//if record == nil {
-	//	log.Printf("[WARN] Record (%s,%s) not found, removing from state", d.Id(), domain)
-	//	d.SetId("")
-	//	return nil
-	//}
-
 	if err := setRecordAttributes(d, record); err != nil {
 		return diag.FromErr(err)
 	}
@@ -282,12 +276,10 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	if err := d.Set("domain", record.Domain); err != nil {
 		return err
 	}
-
 	if err := d.Set("name", record.Name); err != nil {
 // 	} else {
 		return err
 	}
-
 	if err := d.Set("type", record.Type); err != nil {
 		return err
 	}
@@ -296,11 +288,9 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	if err != nil {
 		priority = 0
 	}
-
 	if err := d.Set("priority", priority); err != nil {
 		return err
 	}
-
 	if err := d.Set("record", record.Content); err != nil {
 		return err
 	}

@@ -55,7 +55,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	// this is only really going work if there is one database/grant setup
 	d.SetId(fmt.Sprintf("%s/%s/%s", response.User.ServerName, response.User.MysqlHost, response.User.Username))
 	grants := []string{}
 	for _, grant := range response.User.Grants {
