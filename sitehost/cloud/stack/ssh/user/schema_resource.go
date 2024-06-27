@@ -1,9 +1,10 @@
 package user
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
 )
 
 // resourceSchema returns a schema with the function to read an ssh user.
@@ -34,11 +35,11 @@ var resourceSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "The password for the user",
 
-		//DiffSuppressOnRefresh: true,
-		//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		// DiffSuppressOnRefresh: true,
+		// DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 		//	// how to check/handle this...
 		//	return true
-		//},
+		// },
 	},
 
 	"read_only_config": {

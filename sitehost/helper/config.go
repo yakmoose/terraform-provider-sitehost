@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/sitehostnz/gosh/pkg/api"
 	"github.com/sitehostnz/gosh/pkg/api/job"
 )
@@ -96,7 +96,7 @@ func WaitForAction(client *api.Client, request job.GetRequest) error {
 		}
 	)
 
-	_, err := (&resource.StateChangeConf{
+	_, err := (&retry.StateChangeConf{
 		Pending:        []string{pending},
 		Refresh:        refreshFn,
 		Target:         []string{target},

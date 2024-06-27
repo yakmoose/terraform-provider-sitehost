@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/ssh/user"
 	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-	"strings"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -27,7 +28,7 @@ func Resource() *schema.Resource {
 	}
 }
 
-// readResource is a function to read a ssh user
+// readResource is a function to read an ssh user.
 func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
@@ -46,24 +47,26 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 			Username:   username,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error retrieving ssh user: server %s, username %s, %s", serverName, username, err)
 	}
 
 	d.SetId(fmt.Sprintf("%s@%s", response.Return.Username, response.Return.ServerName))
 
-	sshkeys := []map[string]string{}
+	sshKeys := []map[string]string{}
 	for _, v := range response.Return.SSHKeys {
-		sshkeys = append(
-			sshkeys,
+		sshKeys = append(
+			sshKeys,
 			map[string]string{
 				"id":      v.ID,
 				"label":   v.Label,
 				"content": v.Content,
 			})
 	}
-	d.Set("ssh_key", sshkeys)
+
+	if err := d.Set("ssh_key", sshKeys); err != nil {
+		return diag.FromErr(err)
+	}
 
 	containers := []map[string]string{}
 	for _, v := range response.Return.Containers {
@@ -73,18 +76,27 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 				"name": v,
 			})
 	}
-	d.Set("container", containers)
+
+	if err := d.Set("container", containers); err != nil {
+		return diag.FromErr(err)
+	}
 
 	volumes := []map[string]string{}
 	for _, v := range response.Return.Volumes {
 		volumes = append(
-			containers,
+			volumes,
 			map[string]string{
 				"name": v,
 			})
 	}
-	d.Set("volumes", volumes)
-	d.Set("read_only_config", response.Return.ReadOnlyConfig)
+
+	if err := d.Set("volume", volumes); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("read_only_config", response.Return.ReadOnlyConfig); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -102,31 +114,36 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		Password:   fmt.Sprint(d.Get("password")),
 	}
 
-	if val := d.Get("container").([]interface{}); val != nil {
+	if val, ok := d.Get("container").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			addRequest.Containers = append(addRequest.Containers, v.(map[string]interface{})["name"].(string))
+			if v, ok := v.(map[string]interface{})["name"].(string); ok {
+				addRequest.Containers = append(addRequest.Containers, v)
+			}
 		}
 	}
 
-	if val := d.Get("volume").([]interface{}); val != nil {
+	if val, ok := d.Get("volume").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			addRequest.Volumes = append(addRequest.Volumes, v.(map[string]interface{})["name"].(string))
+			if v, ok := v.(map[string]interface{})["name"].(string); ok {
+				addRequest.Volumes = append(addRequest.Volumes, v)
+			}
 		}
 	}
 
-	if val := d.Get("ssh_key").([]interface{}); val != nil {
+	if val, ok := d.Get("ssh_key").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			addRequest.SSHKeys = append(addRequest.SSHKeys, v.(map[string]interface{})["id"].(string))
+			if v, ok := v.(map[string]interface{})["id"].(string); ok {
+				addRequest.SSHKeys = append(addRequest.SSHKeys, v)
+			}
 		}
 	}
 
-	if v := d.Get("readonly_config"); v != nil {
-		addRequest.ReadOnlyConfig = v.(bool)
+	if v, ok := d.Get("readonly_config").(bool); ok {
+		addRequest.ReadOnlyConfig = v
 	}
 
 	client := user.New(conf.Client)
 	_, err := client.Add(ctx, addRequest)
-
 	if err != nil {
 		return diag.Errorf("error updating ssh user: server %s, username %s, %s", addRequest.ServerName, addRequest.Username, err)
 	}
@@ -147,31 +164,36 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		Password:   fmt.Sprint(d.Get("password")),
 	}
 
-	if val := d.Get("container").([]interface{}); val != nil {
+	if val, ok := d.Get("container").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			updateRequest.Containers = append(updateRequest.Containers, v.(map[string]interface{})["name"].(string))
+			if v, ok := v.(map[string]interface{})["name"].(string); ok {
+				updateRequest.Containers = append(updateRequest.Containers, v)
+			}
 		}
 	}
 
-	if val := d.Get("volume").([]interface{}); val != nil {
+	if val, ok := d.Get("volume").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			updateRequest.Volumes = append(updateRequest.Volumes, v.(map[string]interface{})["name"].(string))
+			if v, ok := v.(map[string]interface{})["name"].(string); ok {
+				updateRequest.Volumes = append(updateRequest.Volumes, v)
+			}
 		}
 	}
 
-	if val := d.Get("ssh_key").([]interface{}); val != nil {
+	if val, ok := d.Get("ssh_key").([]interface{}); ok && val != nil {
 		for _, v := range val {
-			updateRequest.SSHKeys = append(updateRequest.SSHKeys, v.(map[string]interface{})["id"].(string))
+			if v, ok := v.(map[string]interface{})["id"].(string); ok {
+				updateRequest.SSHKeys = append(updateRequest.SSHKeys, v)
+			}
 		}
 	}
 
-	if v := d.Get("readonly_config"); v != nil {
-		updateRequest.ReadOnlyConfig = v.(bool)
+	if v, ok := d.Get("readonly_config").(bool); ok {
+		updateRequest.ReadOnlyConfig = v
 	}
 
 	client := user.New(conf.Client)
 	response, err := client.Update(ctx, updateRequest)
-
 	if err != nil {
 		return diag.Errorf("error updating ssh user: server %s, username %s, %s", updateRequest.ServerName, updateRequest.Username, err)
 	}
@@ -201,7 +223,6 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Username:   username,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error deleting ssh user: server %s, username %s, %s", serverName, username, err)
 	}
@@ -213,7 +234,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "@")
 
 	if len(split) != 2 {

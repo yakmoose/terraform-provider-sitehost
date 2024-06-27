@@ -6,7 +6,6 @@ import (
 
 // DataSource is the datasource for a cloud database.
 func DataSource() *schema.Resource {
-
 	return &schema.Resource{
 		ReadContext: readResource,
 		Schema:      databaseGrantDataSourceSchema(),

@@ -1,7 +1,7 @@
 package image
 
 // imagesDatasourceSchema returns a schema with the function to read a stack resource.
-//func imagesDatasourceSchema() map[string]*schema.Schema {
+// func imagesDatasourceSchema() map[string]*schema.Schema {
 //	return map[string]*schema.Schema{
 //		"images": {
 //			Type:        schema.TypeList,

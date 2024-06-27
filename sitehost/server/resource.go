@@ -4,11 +4,11 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/gosh/pkg/api/server"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
@@ -91,7 +91,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 }
 
 // readResource is a function to read a new server.
-func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func readResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -163,7 +163,6 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 	}
 
 	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: job.DaemonType}); err != nil {
-
 		return diag.FromErr(err)
 	}
 
@@ -188,7 +187,7 @@ func updateLabel(client *server.Client, d *schema.ResourceData) diag.Diagnostics
 }
 
 // deleteResource is a function to delete a server.
-func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")

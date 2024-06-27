@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db"
@@ -10,7 +11,6 @@ import (
 
 // DataSource is the datasource for a cloud database.
 func DataSource() *schema.Resource {
-
 	return &schema.Resource{
 		ReadContext: readResource,
 		Schema:      databaseDataSourceSchema(),
@@ -19,7 +19,6 @@ func DataSource() *schema.Resource {
 
 // ListDataSource is the datasource for listing databases, with a filter.
 func ListDataSource() *schema.Resource {
-
 	return &schema.Resource{
 		ReadContext: listResource,
 		Schema:      listDatabaseDataSourceSchema(),
@@ -27,7 +26,6 @@ func ListDataSource() *schema.Resource {
 }
 
 func listResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -35,7 +33,6 @@ func listResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	client := db.New(conf.Client)
 
 	listResponse, err := client.List(ctx, db.ListOptions{})
-
 	if err != nil {
 		return diag.Errorf("Failed to fetch database list %s", err)
 	}

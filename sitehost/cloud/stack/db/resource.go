@@ -3,12 +3,12 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db"
+	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -53,7 +53,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
-	d.Set("backup_container", response.Database.Container)
+	if err := d.Set("backup_container", response.Database.Container); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -153,7 +155,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
 
 	if len(split) != 3 {
@@ -164,18 +166,15 @@ func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*sche
 	mysqlHost := split[1]
 	database := split[2]
 
-	err := d.Set("server_name", serverName)
-	if err != nil {
+	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	err = d.Set("mysql_host", mysqlHost)
-	if err != nil {
+	if err := d.Set("mysql_host", mysqlHost); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	err = d.Set("name", database)
-	if err != nil {
+	if err := d.Set("name", database); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
