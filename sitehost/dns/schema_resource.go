@@ -36,7 +36,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		ForceNew:     false,
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
-		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, oldValue, newValue string, d *schema.ResourceData) bool {
 			domain := fmt.Sprintf("%v", d.Get("domain"))
 
 			oldValue = utils.ConstructFqdn(fmt.Sprintf("%v.", oldValue), domain)
@@ -81,7 +81,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
-		DiffSuppressFunc: func(k, oldRecord, newRecord string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, oldRecord, newRecord string, _ *schema.ResourceData) bool {
 			// bloody dots at the end of records...
 			// we have to do this, mainly for NS and CNAME records
 			// Possibly MX records too... hell, let's just do them all

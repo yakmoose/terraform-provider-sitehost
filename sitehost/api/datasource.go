@@ -33,10 +33,22 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	d.SetId("client_id")
-	d.Set("client_id", apiInfo.Return.ClientID)
-	d.Set("contact_id", apiInfo.Return.ContactID)
-	d.Set("roles", apiInfo.Return.Roles)
-	d.Set("modules", apiInfo.Return.Modules)
+
+	if err := d.Set("client_id", apiInfo.Return.ClientID); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("contact_id", apiInfo.Return.ContactID); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("roles", apiInfo.Return.Roles); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("modules", apiInfo.Return.Modules); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

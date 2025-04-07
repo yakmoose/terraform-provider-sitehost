@@ -109,3 +109,17 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 		},
 	}
 }
+
+// listDatabaseDataSourceSchema is the datasource for a listing of databases.
+func listStackDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"stacks": {
+			Type:        schema.TypeList,
+			Computed:    true,
+			Description: "The list of stacks/containers",
+			Elem: &schema.Resource{
+				Schema: stackDataSourceSchema(),
+			},
+		},
+	}
+}

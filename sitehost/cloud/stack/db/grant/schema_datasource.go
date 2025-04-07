@@ -7,37 +7,37 @@ import (
 // databaseGrantDataSourceSchema returns a schema for the database user datasource.
 func databaseGrantDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		//"server_name": {
+		// "server_name": {
 		//	Type:        schema.TypeString,
 		//	Required:    true,
 		//	Description: "The server id/name",
 		//	ForceNew:    true,
-		//},
-		//"mysql_host": {
+		// },
+		// "mysql_host": {
 		//	Type:        schema.TypeString,
 		//	Required:    true,
 		//	Description: "The mysqlhost",
 		//	ForceNew:    true,
-		//},
-		//"username": {
+		// },
+		// "username": {
 		//	Type:        schema.TypeString,
 		//	Required:    true,
 		//	Description: "The username",
 		//	ForceNew:    true,
-		//},
-		//"password": {
+		// },
+		// "password": {
 		//	Type:        schema.TypeString,
 		//	Required:    true,
 		//	Description: "The users password",
 		//	ForceNew:    true,
-		//},
-		//"grants": {
+		// },
+		// "grants": {
 		//	Type:     schema.TypeList,
 		//	Optional: true,
 		//	Required: false,
 		//	Elem: &schema.Schema{
 		//		Type: schema.TypeString,
 		//	},
-		//},
+		// },
 	}
 }

@@ -44,3 +44,16 @@ func sshKeyDataSourceSchema() map[string]*schema.Schema {
 		},
 	}
 }
+
+func listSshKeysDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"ssh_keys": {
+			Type:        schema.TypeSet,
+			Computed:    true,
+			Description: "The list of ssh keys",
+			Elem: &schema.Resource{
+				Schema: sshKeyDataSourceSchema(),
+			},
+		},
+	}
+}

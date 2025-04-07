@@ -51,10 +51,21 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	// id is the server/stack/project combo...
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
-	d.Set("server_name", serverName)
-	d.Set("service", service)
-	d.Set("project", project)
-	d.Set("settings", settings)
+	if err := d.Set("server_name", serverName); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("service", service); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("settings", settings); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

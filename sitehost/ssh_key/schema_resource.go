@@ -1,8 +1,9 @@
 package sshkey
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // resourceSchema is the schema with values for a SSH Key resource.
@@ -22,10 +23,10 @@ var resourceSchema = map[string]*schema.Schema{
 		// don't want things re-keying if they are updated
 		ForceNew:    false,
 		Description: "The `content` is the contents of the public key.",
-		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
 			// we need this in place, since the keys may end up with whitespace and crap, so make sure we're
 			// just looking at the key
-			return strings.TrimSpace(old) == strings.TrimSpace(new)
+			return strings.TrimSpace(oldValue) == strings.TrimSpace(newValue)
 		},
 	},
 	"custom_image_access": {

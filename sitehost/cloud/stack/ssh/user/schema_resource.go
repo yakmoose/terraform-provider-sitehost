@@ -1,9 +1,10 @@
 package user
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
 )
 
 // resourceSchema returns a schema with the function to read an ssh user.
@@ -34,11 +35,11 @@ var resourceSchema = map[string]*schema.Schema{
 		Optional:    true,
 		Description: "The password for the user",
 
-		//DiffSuppressOnRefresh: true,
-		//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+		// DiffSuppressOnRefresh: true,
+		// DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 		//	// how to check/handle this...
 		//	return true
-		//},
+		// },
 	},
 
 	"read_only_config": {
@@ -48,7 +49,7 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 
 	"ssh_key": {
-		Type:     schema.TypeList,
+		Type:     schema.TypeSet,
 		Optional: true,
 		Required: false,
 		Elem: &schema.Resource{
@@ -65,6 +66,7 @@ var resourceSchema = map[string]*schema.Schema{
 					Computed:    true,
 					Description: "The `label` is the name of the SSH Key, and is displayed in CP.",
 				},
+
 				"content": {
 					Type:        schema.TypeString,
 					Computed:    true,
@@ -76,7 +78,7 @@ var resourceSchema = map[string]*schema.Schema{
 
 	// not sure how to validate this correctly
 	// since we can only have one or the other...
-
+	// this is a lit of containers the user has access to
 	"container": {
 		Type:     schema.TypeList,
 		Optional: true,
@@ -91,6 +93,7 @@ var resourceSchema = map[string]*schema.Schema{
 		},
 	},
 
+	// volumes that the thing has access to
 	"volume": {
 		Type:     schema.TypeList,
 		Optional: true,

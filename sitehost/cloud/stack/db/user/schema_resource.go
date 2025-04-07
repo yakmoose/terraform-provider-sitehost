@@ -7,7 +7,6 @@ import (
 // databaseUserResourceSchema returns a schema with the function to create/manipulate a stack database user.
 func databaseUserResourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-
 		"server_name": {
 			Type:        schema.TypeString,
 			Required:    true,
@@ -30,22 +29,6 @@ func databaseUserResourceSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Required:    true,
 			Description: "The users password",
-		},
-		"database": {
-			Type:         schema.TypeString,
-			Required:     false,
-			Optional:     true,
-			Description:  "The database name",
-			RequiredWith: []string{"grants"},
-		},
-		"grants": {
-			Type:         schema.TypeList,
-			Optional:     true,
-			Required:     false,
-			RequiredWith: []string{"database"},
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
 		},
 	}
 }

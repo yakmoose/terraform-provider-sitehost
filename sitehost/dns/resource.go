@@ -4,7 +4,6 @@ package dns
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/utils"
 	"log"
 	"strconv"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/gosh/pkg/models"
+	"github.com/sitehostnz/gosh/pkg/utils"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -147,7 +147,6 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		Content:  domainRecord.Content,
 		Priority: domainRecord.Priority,
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -177,7 +176,6 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 		ID:         d.Id(),
 		DomainName: domain,
 	})
-
 	if err != nil {
 		return diag.Errorf("Error retrieving DNS record: %s", err)
 	}
@@ -243,7 +241,6 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		ID:         d.Id(),
 		DomainName: fmt.Sprintf("%v", d.Get("domain")),
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -256,7 +253,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 // importRecordResource is a function to import a DNS Record.
-func importRecordResource(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func importRecordResource(_ context.Context, d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
 	if strings.Contains(d.Id(), ",") {
 		s := strings.Split(d.Id(), ",")
 
@@ -277,7 +274,7 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 		return err
 	}
 	if err := d.Set("name", record.Name); err != nil {
-// 	} else {
+		// 	} else {
 		return err
 	}
 	if err := d.Set("type", record.Type); err != nil {

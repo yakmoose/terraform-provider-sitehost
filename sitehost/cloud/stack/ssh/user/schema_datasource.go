@@ -20,7 +20,7 @@ func userDataSourceSchema() map[string]*schema.Schema {
 		},
 
 		"ssh_key": {
-			Type:     schema.TypeList,
+			Type:     schema.TypeSet,
 			Optional: true,
 			Computed: true,
 			Elem: &schema.Resource{

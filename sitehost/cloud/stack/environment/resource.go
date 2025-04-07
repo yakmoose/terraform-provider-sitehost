@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sitehostnz/gosh/pkg/api/job"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
+	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
@@ -57,10 +56,21 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
-	d.Set("server_name", serverName)
-	d.Set("service", service)
-	d.Set("project", project)
-	d.Set("settings", settings)
+	if err := d.Set("server_name", serverName); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("service", service); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("settings", settings); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -82,12 +92,22 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	environmentVariables := []models.EnvironmentVariable{}
 	if d.HasChange("settings") {
-		oldV, newV := d.GetChange("settings")
+		ov, nv := d.GetChange("settings")
+
+		newV, ok := nv.(map[string]interface{})
+		if !ok {
+			return diag.Errorf("failed to convert settings to map")
+		}
+
+		oldV, ok := ov.(map[string]interface{})
+		if !ok {
+			return diag.Errorf("failed to convert settings to map")
+		}
 
 		// things that exist in new, need to be added or updated.
-		for k, v := range newV.(map[string]interface{}) {
+		for k, v := range newV {
 			// if the content is different or does not exist, then we need to update it.
-			if oldV.(map[string]interface{})[k] != newV.(map[string]interface{})[k] {
+			if oldV[k] != newV[k] {
 				environmentVariables = append(
 					environmentVariables,
 					models.EnvironmentVariable{Name: k, Content: fmt.Sprintf("%v", v)},
@@ -96,8 +116,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 
 		// removals - if something does not exist in the new map, then we need to remove it.
-		for k, _ := range oldV.(map[string]interface{}) {
-			if _, exists := newV.(map[string]interface{})[k]; !exists {
+		for k := range oldV {
+			if _, exists := newV[k]; !exists {
 				environmentVariables = append(
 					environmentVariables,
 					models.EnvironmentVariable{Name: k, Content: ""},
@@ -125,7 +145,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 			return diag.FromErr(err)
 		}
-
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
@@ -133,38 +152,37 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 // deleteResource is a function to delete a stack environment.
-func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	//conf, ok := meta.(*helper.CombinedConfig)
-	//if !ok {
+func deleteResource(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	// conf, ok := meta.(*helper.CombinedConfig)
+	// if !ok {
 	//	return diag.Errorf("failed to convert meta object")
-	//}
+	// }
 	//
-	//client := environment.New(conf.Client)
+	// client := environment.New(conf.Client)
 	//
-	//serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	//username := fmt.Sprintf("%v", d.Get("username"))
+	// serverName := fmt.Sprintf("%v", d.Get("server_name"))
+	// username := fmt.Sprintf("%v", d.Get("username"))
 	//
-	//response, err := client.Delete(
+	// response, err := client.Delete(
 	//	ctx,
 	//	environment.DeleteRequest{
 	//		ServerName: serverName,
 	//		Username:   username,
 	//	},
-	//)
+	// )
 	//
-	//if err != nil {
+	// if err != nil {
 	//	return diag.Errorf("error retrieving ssh user: server %s, username %s, %s", serverName, username, err)
-	//}
+	// }
 	//
-	//if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	// if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
 	//	return diag.FromErr(err)
-	//}
+	// }
 
 	return nil
 }
 
-func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[project]/[service]", d.Id())
@@ -174,18 +192,15 @@ func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*sche
 	project := split[1]
 	service := split[2]
 
-	err := d.Set("server_name", serverName)
-	if err != nil {
+	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing stack environment: server %s, project %s, service %s, %s", serverName, service, project, err)
 	}
 
-	err = d.Set("project", project)
-	if err != nil {
+	if err := d.Set("project", project); err != nil {
 		return nil, fmt.Errorf("error importing stack environment: server %s, project %s, service %s, %s", serverName, service, project, err)
 	}
 
-	err = d.Set("service", service)
-	if err != nil {
+	if err := d.Set("service", service); err != nil {
 		return nil, fmt.Errorf("error importing stack environment: server %s, project %s, service %s, %s", serverName, service, project, err)
 	}
 

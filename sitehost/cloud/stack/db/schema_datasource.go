@@ -33,9 +33,8 @@ func databaseDataSourceSchema() map[string]*schema.Schema {
 // listDatabaseDataSourceSchema is the datasource for a listing of databases.
 func listDatabaseDataSourceSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-
 		"databases": {
-			Type:        schema.TypeList,
+			Type:        schema.TypeSet,
 			Computed:    true,
 			Description: "The list of databases",
 			Elem: &schema.Resource{

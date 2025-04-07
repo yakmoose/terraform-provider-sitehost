@@ -3,14 +3,13 @@ package user
 import (
 	"context"
 	"fmt"
-	"github.com/sitehostnz/gosh/pkg/api/cloud/db/user"
-	"github.com/sitehostnz/gosh/pkg/api/job"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
-
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/sitehostnz/gosh/pkg/api/cloud/db/user"
+	"github.com/sitehostnz/gosh/pkg/api/job"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
 // Resource returns a schema with the operations for Server resource.
@@ -50,19 +49,11 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 			Username:   username,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", response.User.ServerName, response.User.MysqlHost, response.User.Username))
-	grants := []string{}
-	for _, grant := range response.User.Grants {
-		for _, g := range grant.Grants {
-			grants = append(grants, g)
-		}
-	}
-	d.Set("grants", grants)
 
 	return nil
 }
@@ -81,13 +72,6 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	password := fmt.Sprintf("%v", d.Get("password"))
 	database := fmt.Sprintf("%v", d.Get("database"))
 
-	grants := d.Get("grants").([]interface{})
-
-	g := make([]string, len(grants))
-	for i, v := range grants {
-		g[i] = fmt.Sprint(v)
-	}
-
 	response, err := client.Add(
 		ctx,
 		user.AddRequest{
@@ -95,11 +79,9 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			MySQLHost:  mysqlHost,
 			Username:   username,
 			Password:   password,
-			Grants:     g,
 			Database:   database,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
@@ -135,7 +117,6 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Password:   password,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error updating database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
@@ -179,7 +160,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 // importResource is a function to import a stack database user.
-func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
 	split := strings.Split(d.Id(), "/")
 
 	if len(split) != 3 {
@@ -190,18 +171,15 @@ func importResource(ctx context.Context, d *schema.ResourceData, _ any) ([]*sche
 	mysqlHost := split[1]
 	username := split[2]
 
-	err := d.Set("server_name", serverName)
-	if err != nil {
+	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	err = d.Set("mysql_host", mysqlHost)
-	if err != nil {
+	if err := d.Set("mysql_host", mysqlHost); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	err = d.Set("username", username)
-	if err != nil {
+	if err := d.Set("username", username); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
