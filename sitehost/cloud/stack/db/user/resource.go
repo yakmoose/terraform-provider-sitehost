@@ -54,13 +54,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", response.User.ServerName, response.User.MysqlHost, response.User.Username))
-	grants := []string{}
-	for _, grant := range response.User.Grants {
-		grants = append(grants, grant.Grants...)
-	}
-	if err := d.Set("grants", grants); err != nil {
-		return diag.FromErr(err)
-	}
 
 	return nil
 }
@@ -79,16 +72,6 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	password := fmt.Sprintf("%v", d.Get("password"))
 	database := fmt.Sprintf("%v", d.Get("database"))
 
-	grants, ok := d.Get("grants").([]interface{})
-	if !ok {
-		return diag.Errorf("failed to convert grants")
-	}
-
-	g := make([]string, len(grants))
-	for i, v := range grants {
-		g[i] = fmt.Sprint(v)
-	}
-
 	response, err := client.Add(
 		ctx,
 		user.AddRequest{
@@ -96,7 +79,6 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			MySQLHost:  mysqlHost,
 			Username:   username,
 			Password:   password,
-			Grants:     g,
 			Database:   database,
 		},
 	)

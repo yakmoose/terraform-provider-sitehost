@@ -49,7 +49,7 @@ var resourceSchema = map[string]*schema.Schema{
 	},
 
 	"ssh_key": {
-		Type:     schema.TypeList,
+		Type:     schema.TypeSet,
 		Optional: true,
 		Required: false,
 		Elem: &schema.Resource{
@@ -66,6 +66,7 @@ var resourceSchema = map[string]*schema.Schema{
 					Computed:    true,
 					Description: "The `label` is the name of the SSH Key, and is displayed in CP.",
 				},
+
 				"content": {
 					Type:        schema.TypeString,
 					Computed:    true,
@@ -77,7 +78,7 @@ var resourceSchema = map[string]*schema.Schema{
 
 	// not sure how to validate this correctly
 	// since we can only have one or the other...
-
+	// this is a lit of containers the user has access to
 	"container": {
 		Type:     schema.TypeList,
 		Optional: true,
@@ -92,6 +93,7 @@ var resourceSchema = map[string]*schema.Schema{
 		},
 	},
 
+	// volumes that the thing has access to
 	"volume": {
 		Type:     schema.TypeList,
 		Optional: true,

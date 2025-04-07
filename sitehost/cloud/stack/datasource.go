@@ -3,8 +3,6 @@ package stack
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
@@ -21,39 +19,43 @@ func DataSource() *schema.Resource {
 	}
 }
 
-// readDataSource calls the GoSH client to set the cloud stack schema.
-func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+// ListDataSource is the datasource for listing stacks, with/without a filter.
+func ListDataSource() *schema.Resource {
+	return &schema.Resource{
+		ReadContext: listResource,
+		Schema:      listStackDataSourceSchema(),
+	}
+}
+
+func listResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
 	}
-
 	client := stack.New(conf.Client)
 
-	resp, err := client.Get(ctx, stack.GetRequest{
-		ServerName: fmt.Sprintf("%v", d.Get("server_name")),
-		Name:       fmt.Sprintf("%v", d.Get("name")),
-	})
+	listResponse, err := client.List(ctx, stack.ListRequest{})
 	if err != nil {
-		return diag.Errorf("Error retrieving api info: %s", err)
+		return diag.Errorf("Failed to fetch database list %s", err)
 	}
 
-	if !resp.Status {
-		return diag.Errorf("Error retrieving api info: %s", resp.Msg)
+	stacks := []map[string]string{}
+	for _, v := range listResponse.Return.Stacks {
+		s := map[string]string{
+			"name":         v.Name,
+			"label":        v.Label,
+			"server_id":    v.ServerID,
+			"server_name":  v.Server,
+			"server_label": v.ServerLabel,
+		}
+		//
+		stacks = append(stacks, s)
 	}
 
-	d.SetId(resp.Stack.Name)
+	d.SetId("stacks")
 
-	if err := d.Set("label", resp.Stack.Label); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("server_name", resp.Stack.Server); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("server_label", resp.Stack.ServerLabel); err != nil {
-		return diag.FromErr(err)
+	if err := d.Set("stacks", stacks); err != nil {
+		return diag.Errorf("Error retrieving stacks: %s", err)
 	}
 
 	return nil

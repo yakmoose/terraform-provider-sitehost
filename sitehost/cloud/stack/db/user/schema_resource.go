@@ -30,21 +30,5 @@ func databaseUserResourceSchema() map[string]*schema.Schema {
 			Required:    true,
 			Description: "The users password",
 		},
-		"database": {
-			Type:         schema.TypeString,
-			Required:     false,
-			Optional:     true,
-			Description:  "The database name",
-			RequiredWith: []string{"grants"},
-		},
-		"grants": {
-			Type:         schema.TypeList,
-			Optional:     true,
-			Required:     false,
-			RequiredWith: []string{"database"},
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
 	}
 }

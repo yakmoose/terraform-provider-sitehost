@@ -180,8 +180,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 
-	if val, ok := d.Get("ssh_key").([]interface{}); ok && val != nil {
-		for _, v := range val {
+	if val, ok := d.Get("ssh_key").(*schema.Set); ok && val != nil {
+		for _, v := range val.List() {
 			if v, ok := v.(map[string]interface{})["id"].(string); ok {
 				updateRequest.SSHKeys = append(updateRequest.SSHKeys, v)
 			}

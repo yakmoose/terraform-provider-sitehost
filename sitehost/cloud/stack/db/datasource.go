@@ -56,7 +56,7 @@ func listResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	d.SetId("databases")
 
 	if err := d.Set("databases", databases); err != nil {
-		return diag.Errorf("Error retrieving api info: %s", err)
+		return diag.Errorf("Error retrieving database info: %s", err)
 	}
 
 	return nil
