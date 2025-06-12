@@ -26,9 +26,10 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	project := fmt.Sprintf("%v", d.Get("project"))
-	service := fmt.Sprintf("%v", d.Get("service"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	project := fmt.Sprint(d.Get("project"))
+	service := fmt.Sprint(d.Get("service"))
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
 	if service == "" {
 		service = project
@@ -50,7 +51,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	// id is the server/stack/project combo...
-	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
+
 	if err := d.Set("server_name", serverName); err != nil {
 		return diag.FromErr(err)
 	}

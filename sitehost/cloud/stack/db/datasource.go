@@ -37,7 +37,7 @@ func listResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("Failed to fetch database list %s", err)
 	}
 
-	databases := []map[string]string{}
+	databases := make([]map[string]string, 0, len(listResponse.Return.Databases))
 	for _, v := range listResponse.Return.Databases {
 		d := map[string]string{
 			"name":             v.DBName,
@@ -47,7 +47,8 @@ func listResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 			"mysql_host":       v.MySQLHost,
 			"backup_container": v.Container,
 
-			// I've intentionally left out the grants here
+			// we don't want to include grants or users here...
+			// we are treating those as stand-alone operations...
 		}
 
 		databases = append(databases, d)

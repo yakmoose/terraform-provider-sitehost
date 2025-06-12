@@ -19,7 +19,7 @@ var resourceSchema = map[string]*schema.Schema{
 		Description: "The Stack label",
 	},
 
-	// this is a create option, and exists against an individual container.
+	// this is a create option and exists against an individual container.
 	"enable_ssl": {
 		Type:        schema.TypeBool,
 		Optional:    true,
@@ -94,18 +94,7 @@ var resourceSchema = map[string]*schema.Schema{
 		},
 	},
 
-	// questions, is the volumes standard? or comes from elsewhere? ports etc...
-	// this will be an abstraction on top of the other schema stuff
-	// since we can add them when creating, but updating does not change these
-	"settings": {
-		Type:     schema.TypeMap,
-		Optional: true,
-		Elem: &schema.Schema{
-			Type: schema.TypeString,
-		},
-	},
-
-	// server properties, can't change these, informational only.
+	// server properties can't change these, informational only.
 	"server_name": {
 		Type:        schema.TypeString,
 		Required:    true,

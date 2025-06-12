@@ -30,4 +30,11 @@ type (
 			Driver string `yaml:"driver,omitempty"`
 		} `yaml:"volumes,omitempty"`
 	}
+
+	// ParsedStackName represents the components of a parsed stack name, it is used primarily in importing so we can handle multiple import formats.
+	ParsedStackName struct {
+		ServerName string
+		Project    string
+		Service    string
+	}
 )

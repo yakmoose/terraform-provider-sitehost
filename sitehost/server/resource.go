@@ -57,31 +57,31 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		},
 	}
 
-	res, err := client.Create(ctx, opts)
+	resp, err := client.Create(ctx, opts)
 	if err != nil {
 		return diag.Errorf("Error creating server: %s", err)
 	}
 
-	if !res.Status {
-		return diag.Errorf("Error creating server: %s", res.Msg)
+	if !resp.Status {
+		return diag.Errorf("Error creating server: %s", resp.Msg)
 	}
 
 	// Set data
-	d.SetId(res.Return.Name)
-	if err := d.Set("name", res.Return.Name); err != nil {
+	d.SetId(resp.Return.Name)
+	if err := d.Set("name", resp.Return.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("password", res.Return.Password); err != nil {
+	if err := d.Set("password", resp.Return.Password); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("ips", res.Return.Ips); err != nil {
+	if err := d.Set("ips", resp.Return.Ips); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// wait for "Completed" status
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: res.Return.JobID, Type: job.DaemonType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: resp.Return.ID, Type: resp.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -162,7 +162,7 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 		return diag.Errorf("Error upgrading server: %s", res.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: job.DaemonType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: resp.Return.ID, Type: resp.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -206,7 +206,7 @@ func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Di
 		return diag.Errorf("Error deleting server: %s", resp.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: resp.Return.JobID, Type: job.DaemonType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: resp.Return.ID, Type: resp.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -2,6 +2,7 @@ package sshkey
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sshkey "github.com/sitehostnz/gosh/pkg/api/ssh/key"
@@ -22,7 +23,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listDataSource,
-		Schema:      listSshKeysDataSourceSchema(),
+		Schema:      listSSHKeysDataSourceSchema(),
 	}
 }
 

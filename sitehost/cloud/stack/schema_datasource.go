@@ -75,23 +75,13 @@ func stackDataSourceSchema() map[string]*schema.Schema {
 			},
 		},
 
-		// questions, is the volumes standard? or comes from elsewhere? ports etc...
-		// this will be an abstraction on top of the other schema stuff
-		// since we can add them when creating, but updating does not change these
-		"settings": {
-			Computed: true,
-			Type:     schema.TypeMap,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
-
-		// server properties, can't change these, informational only
 		"server_name": {
 			Required:    true,
 			Type:        schema.TypeString,
 			Description: "The Server name where the stack lives",
 		},
+
+		// Server properties. We can't change these, informational only
 		"server_label": {
 			Computed:    true,
 			Type:        schema.TypeString,

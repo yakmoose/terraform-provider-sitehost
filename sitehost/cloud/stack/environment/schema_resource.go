@@ -7,14 +7,16 @@ import (
 // stackDataSourceSchema returns a schema with the function to read Server resource.
 var resourceSchema = map[string]*schema.Schema{
 	"server_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The server id/name",
+		Type:              schema.TypeString,
+		Required:          true,
+		RequiredForImport: true,
+		Description:       "The server id/name",
 	},
 	"project": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The the project id/name",
+		Type:              schema.TypeString,
+		Required:          true,
+		RequiredForImport: true,
+		Description:       "The the project id/name",
 	},
 	"service": {
 		Type:        schema.TypeString,
@@ -31,5 +33,6 @@ var resourceSchema = map[string]*schema.Schema{
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
+		//		ValidateFunc: validation.StringIsNotWhiteSpace,
 	},
 }

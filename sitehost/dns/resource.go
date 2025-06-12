@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/gosh/pkg/models"
-	"github.com/sitehostnz/gosh/pkg/utils"
+	"github.com/sitehostnz/gosh/pkg/net"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -39,7 +39,7 @@ func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 	domain := fmt.Sprintf("%v", d.Get("name"))
 
-	// The response don't have the domain name, so we need to get it from the request.
+	// The responses don't have the domain name, so we need to get it from the request.
 	resp, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domain})
 	if err != nil {
 		return diag.Errorf("Error creating domain: %s", err)
@@ -128,7 +128,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	name := utils.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
+	name := net.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
 
 	domainRecord := models.DNSRecord{
 		Name:     strings.TrimSuffix(name, "."),

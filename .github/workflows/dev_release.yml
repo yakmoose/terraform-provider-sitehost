@@ -10,16 +10,16 @@ on:
 jobs:
   releaser:
     name: Release
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.20.6
+          go-version: 1.24.4
       -
         name: Update go mod
         if: ${{ github.event.inputs.replaceMod != '' }}
@@ -29,7 +29,7 @@ jobs:
 
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --clean --skip-validate

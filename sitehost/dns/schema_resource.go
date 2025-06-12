@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/sitehostnz/gosh/pkg/utils"
+	"github.com/sitehostnz/gosh/pkg/net"
 )
 
 // resourceZoneSchema is the schema with values for a DNS zone resource.
@@ -39,8 +39,8 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: func(_, oldValue, newValue string, d *schema.ResourceData) bool {
 			domain := fmt.Sprintf("%v", d.Get("domain"))
 
-			oldValue = utils.ConstructFqdn(fmt.Sprintf("%v.", oldValue), domain)
-			newValue = utils.ConstructFqdn(newValue, domain)
+			oldValue = net.ConstructFqdn(fmt.Sprintf("%v.", oldValue), domain)
+			newValue = net.ConstructFqdn(newValue, domain)
 
 			return newValue == oldValue
 		},

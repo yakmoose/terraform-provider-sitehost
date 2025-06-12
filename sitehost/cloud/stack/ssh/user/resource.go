@@ -36,9 +36,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	client := user.New(conf.Client)
-
 	serverName := fmt.Sprint(d.Get("server_name"))
 	username := fmt.Sprint(d.Get("username"))
+	d.SetId(fmt.Sprintf("%s@%s", username, serverName))
 
 	response, err := client.Get(
 		ctx,
@@ -51,9 +51,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("error retrieving ssh user: server %s, username %s, %s", serverName, username, err)
 	}
 
-	d.SetId(fmt.Sprintf("%s@%s", response.Return.Username, response.Return.ServerName))
-
-	sshKeys := []map[string]string{}
+	sshKeys := make([]map[string]string, 0, len(response.Return.SSHKeys))
 	for _, v := range response.Return.SSHKeys {
 		sshKeys = append(
 			sshKeys,
@@ -68,7 +66,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.FromErr(err)
 	}
 
-	containers := []map[string]string{}
+	containers := make([]map[string]string, 0, len(response.Return.Containers))
 	for _, v := range response.Return.Containers {
 		containers = append(
 			containers,
@@ -81,7 +79,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.FromErr(err)
 	}
 
-	volumes := []map[string]string{}
+	volumes := make([]map[string]string, 0, len(response.Return.Volumes))
 	for _, v := range response.Return.Volumes {
 		volumes = append(
 			volumes,
@@ -108,13 +106,18 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("failed to convert meta object")
 	}
 
+	serverName := fmt.Sprint(d.Get("server_name"))
+	username := fmt.Sprint(d.Get("username"))
+	d.SetId(fmt.Sprintf("%s@%s", username, serverName))
+
 	addRequest := user.AddRequest{
-		ServerName: fmt.Sprint(d.Get("server_name")),
-		Username:   fmt.Sprint(d.Get("username")),
+		ServerName: serverName,
+		Username:   username,
 		Password:   fmt.Sprint(d.Get("password")),
 	}
 
 	if val, ok := d.Get("container").([]interface{}); ok && val != nil {
+		addRequest.Containers = make([]string, 0, len(val))
 		for _, v := range val {
 			if v, ok := v.(map[string]interface{})["name"].(string); ok {
 				addRequest.Containers = append(addRequest.Containers, v)
@@ -124,14 +127,16 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	if val, ok := d.Get("volume").([]interface{}); ok && val != nil {
 		for _, v := range val {
+			addRequest.Volumes = make([]string, 0, len(val))
 			if v, ok := v.(map[string]interface{})["name"].(string); ok {
 				addRequest.Volumes = append(addRequest.Volumes, v)
 			}
 		}
 	}
 
-	if val, ok := d.Get("ssh_key").([]interface{}); ok && val != nil {
-		for _, v := range val {
+	if val, ok := d.Get("ssh_key").(*schema.Set); ok && val != nil {
+		addRequest.SSHKeys = make([]string, 0, val.Len())
+		for _, v := range val.List() {
 			if v, ok := v.(map[string]interface{})["id"].(string); ok {
 				addRequest.SSHKeys = append(addRequest.SSHKeys, v)
 			}
@@ -143,9 +148,13 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := user.New(conf.Client)
-	_, err := client.Add(ctx, addRequest)
+	response, err := client.Add(ctx, addRequest)
 	if err != nil {
-		return diag.Errorf("error updating ssh user: server %s, username %s, %s", addRequest.ServerName, addRequest.Username, err)
+		return diag.Errorf("error creating ssh user: server %s, username %s, %s", addRequest.ServerName, addRequest.Username, err)
+	}
+
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -165,6 +174,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	if val, ok := d.Get("container").([]interface{}); ok && val != nil {
+		updateRequest.Containers = make([]string, 0, len(val))
 		for _, v := range val {
 			if v, ok := v.(map[string]interface{})["name"].(string); ok {
 				updateRequest.Containers = append(updateRequest.Containers, v)
@@ -174,6 +184,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	if val, ok := d.Get("volume").([]interface{}); ok && val != nil {
 		for _, v := range val {
+			updateRequest.Volumes = make([]string, 0, len(val))
 			if v, ok := v.(map[string]interface{})["name"].(string); ok {
 				updateRequest.Volumes = append(updateRequest.Volumes, v)
 			}
@@ -181,6 +192,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	if val, ok := d.Get("ssh_key").(*schema.Set); ok && val != nil {
+		updateRequest.SSHKeys = make([]string, 0, val.Len())
 		for _, v := range val.List() {
 			if v, ok := v.(map[string]interface{})["id"].(string); ok {
 				updateRequest.SSHKeys = append(updateRequest.SSHKeys, v)
@@ -198,7 +210,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error updating ssh user: server %s, username %s, %s", updateRequest.ServerName, updateRequest.Username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -213,8 +225,8 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	client := user.New(conf.Client)
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	username := fmt.Sprintf("%v", d.Get("username"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	username := fmt.Sprint(d.Get("username"))
 
 	response, err := client.Delete(
 		ctx,
@@ -227,7 +239,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error deleting ssh user: server %s, username %s, %s", serverName, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -243,6 +255,8 @@ func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema
 
 	serverName := split[1]
 	username := split[0]
+
+	d.SetId(fmt.Sprintf("%s@%s", username, serverName))
 
 	err := d.Set("server_name", serverName)
 	if err != nil {

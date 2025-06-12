@@ -33,7 +33,7 @@ func Resource() *schema.Resource {
 // readResource is a function to read a user from a stack database.
 func readResource(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// fun thing, we don't get grants from the grant endpoint, we get them from the user endpoint
-	// so we need to get the user data and then filter out the grants that we want
+	// we need to get the user data and then filter out the grants that we want
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -41,10 +41,11 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	userClient := user.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	username := fmt.Sprintf("%v", d.Get("username"))
-	database := fmt.Sprintf("%v", d.Get("database"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	username := fmt.Sprint(d.Get("username"))
+	database := fmt.Sprint(d.Get("database"))
+	d.SetId(fmt.Sprintf("%s/%s/%s/%s", serverName, mysqlHost, database, username))
 
 	response, err := userClient.Get(
 		ctx,
@@ -54,12 +55,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 			Username:   username,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error retrieving database user: server %s, host %s, database %s, username %s, %s", serverName, mysqlHost, database, username, err)
 	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s/%s", response.User.ServerName, response.User.MysqlHost, database, response.User.Username))
 
 	if helper.Has(response.User.Grants, func(g models.Grant) bool {
 		return g.DBName == database
@@ -85,10 +83,11 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := grant.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	username := fmt.Sprintf("%v", d.Get("username"))
-	database := fmt.Sprintf("%v", d.Get("database"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	username := fmt.Sprint(d.Get("username"))
+	database := fmt.Sprint(d.Get("database"))
+	d.SetId(fmt.Sprintf("%s/%s/%s/%s", serverName, mysqlHost, database, username))
 
 	var g []string
 	if grants, ok := d.Get("grants").([]interface{}); ok {
@@ -108,16 +107,13 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Database:   database,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error retrieving database grants: server %s, host %s, database %s, username %s, %s", serverName, mysqlHost, database, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s/%s", serverName, mysqlHost, database, username))
 
 	return nil
 }
@@ -130,10 +126,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := grant.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	username := fmt.Sprintf("%v", d.Get("username"))
-	// username := fmt.Sprintf("%v", d.Get("username"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	username := fmt.Sprint(d.Get("username"))
 
 	response, err := client.Update(
 		ctx,
@@ -148,7 +143,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error updating database grant: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -163,10 +158,9 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := grant.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	username := fmt.Sprintf("%v", d.Get("username"))
-	//database := fmt.Sprintf("%v", d.Get("database"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	username := fmt.Sprint(d.Get("username"))
 
 	response, err := client.Delete(
 		ctx,
@@ -176,12 +170,11 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			Username:   username,
 		},
 	)
-
 	if err != nil {
 		return diag.Errorf("error removing database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -190,16 +183,18 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // importResource is a function to import a stack database user.
 func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+	// todo: create parser/helper for database grants
 	split := strings.Split(d.Id(), "/")
-
 	if len(split) != 4 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[mysql_host]/[database]/[username]", d.Id())
 	}
 
 	serverName := split[0]
 	mysqlHost := split[1]
-	username := split[2]
-	database := split[3]
+	database := split[2]
+	username := split[3]
+
+	d.SetId(fmt.Sprintf("%s/%s/%s/%s", serverName, mysqlHost, database, username))
 
 	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, host %s, username %s, database %s, %s", serverName, mysqlHost, username, database, err)
