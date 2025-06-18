@@ -1,6 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [v1.x.x] 2025-
 ## [v1.2.0] 2024-03-13
 ### Added
 - Added `sitehost_ssh_key` resource.

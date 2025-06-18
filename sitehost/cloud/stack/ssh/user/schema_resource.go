@@ -34,18 +34,13 @@ var resourceSchema = map[string]*schema.Schema{
 		Sensitive:   true,
 		Optional:    true,
 		Description: "The password for the user",
-
-		// DiffSuppressOnRefresh: true,
-		// DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-		//	// how to check/handle this...
-		//	return true
-		// },
 	},
 
 	"read_only_config": {
 		Type:     schema.TypeBool,
 		Optional: true,
-		Default:  false,
+		Default:  nil,
+		Computed: true,
 	},
 
 	"ssh_key": {

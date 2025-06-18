@@ -12,11 +12,9 @@ import (
 
 // DataSource returns a schema with the function to read cloud stack resource.
 func DataSource() *schema.Resource {
-	recordSchema := stackDataSourceSchema()
-
 	return &schema.Resource{
 		ReadContext: readResource,
-		Schema:      recordSchema,
+		Schema:      stackDataSourceSchema,
 	}
 }
 
@@ -24,7 +22,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listResource,
-		Schema:      listStackDataSourceSchema(),
+		Schema:      listStackDataSourceSchema,
 	}
 }
 

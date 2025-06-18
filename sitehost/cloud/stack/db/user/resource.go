@@ -24,7 +24,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
-		Schema: databaseUserResourceSchema(),
+		Schema: databaseUserResourceSchema,
 	}
 }
 
@@ -68,9 +68,9 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	serverName := fmt.Sprintf("%v", d.Get("server_name"))
 	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("database"))
 	username := fmt.Sprintf("%v", d.Get("username"))
 	password := fmt.Sprintf("%v", d.Get("password"))
-	database := fmt.Sprintf("%v", d.Get("database"))
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, username))
 
@@ -85,7 +85,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		},
 	)
 	if err != nil {
-		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
+		return diag.Errorf("error creating database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
 	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {

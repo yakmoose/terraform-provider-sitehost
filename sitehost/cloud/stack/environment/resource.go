@@ -39,17 +39,22 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	serverName := fmt.Sprint(d.Get("server_name"))
 	project := fmt.Sprint(d.Get("project"))
 	service := fmt.Sprint(d.Get("service"))
-	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
 	if service == "" {
 		service = project
+		if d.Set("service", service) != nil {
+			return nil
+		}
 	}
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
 
 	client := environment.New(conf.Client)
 	environmentVariablesResponse, err := client.Get(
 		ctx,
 		environment.GetRequest{ServerName: serverName, Project: project, Service: service},
 	)
+
 	if err != nil {
 		return diag.Errorf("Error retrieving environment info: %s", err)
 	}
@@ -57,18 +62,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	settings := map[string]string{}
 	for _, v := range environmentVariablesResponse.EnvironmentVariables {
 		settings[strings.ToUpper(v.Name)] = v.Content
-	}
-
-	if err := d.Set("server_name", serverName); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("service", service); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("project", project); err != nil {
-		return diag.FromErr(err)
 	}
 
 	if err := d.Set("settings", settings); err != nil {
@@ -91,6 +84,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	if service == "" {
 		service = project
+		if d.Set("service", service) != nil {
+			return nil
+		}
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, project, service))
@@ -104,8 +100,9 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	// if we have changes... then we need to push em...
 	// what happens if we have an empty list...
+	client := environment.New(conf.Client)
+
 	if len(environmentVariables) > 0 {
-		client := environment.New(conf.Client)
 		response, err := client.Update(
 			ctx,
 			environment.UpdateRequest{

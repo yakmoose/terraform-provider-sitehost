@@ -39,7 +39,7 @@ func New(version string) func() *schema.Provider {
 				}, "api_endpoint": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "The HTTP(S) API address of the SiteHost API to use.",
+					Description: "The HTTPS API address of the SiteHost API to use.",
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
@@ -48,7 +48,6 @@ func New(version string) func() *schema.Provider {
 				"sitehost_cloud_database":       db.DataSource(),
 				"sitehost_cloud_databases":      db.ListDataSource(),
 				"sitehost_cloud_database_grant": grant.DataSource(),
-				"sitehost_cloud_database_user":  db_user.DataSource(),
 
 				"sitehost_cloud_ssh_user": ssh_user.DataSource(),
 

@@ -13,7 +13,7 @@ import (
 func DataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: readResource,
-		Schema:      databaseDataSourceSchema(),
+		Schema:      databaseDataSourceSchema,
 	}
 }
 

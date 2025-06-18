@@ -5,35 +5,33 @@ import (
 )
 
 // apiInfoDataSourceSchema is the schema with values for API info resource.
-func apiInfoDataSourceSchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"client_id": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Optional:    true,
-			Description: "The client id",
-		},
-		"contact_id": {
-			Type:     schema.TypeString,
-			Computed: true,
-			Optional: true,
+var apiInfoDataSourceSchema = map[string]*schema.Schema{
+	"client_id": {
+		Type:        schema.TypeString,
+		Computed:    true,
+		Optional:    true,
+		Description: "The client id",
+	},
+	"contact_id": {
+		Type:     schema.TypeString,
+		Computed: true,
+		Optional: true,
 
-			Description: "The contact id",
+		Description: "The contact id",
+	},
+	"roles": {
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
 		},
-		"roles": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
+	},
+	"modules": {
+		Type:     schema.TypeList,
+		Computed: true,
+		Optional: true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
 		},
-		"modules": {
-			Type:     schema.TypeList,
-			Computed: true,
-			Optional: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-		},
-	}
+	},
 }

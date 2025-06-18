@@ -147,6 +147,10 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		addRequest.ReadOnlyConfig = v
 	}
 
+	if err := d.Set("read_only_config", addRequest.ReadOnlyConfig); err != nil {
+		return diag.FromErr(err)
+	}
+
 	client := user.New(conf.Client)
 	response, err := client.Add(ctx, addRequest)
 	if err != nil {
@@ -200,8 +204,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 
-	if v, ok := d.Get("readonly_config").(bool); ok {
-		updateRequest.ReadOnlyConfig = v
+	if err := d.Set("read_only_config", updateRequest.ReadOnlyConfig); err != nil {
+		return diag.FromErr(err)
 	}
 
 	client := user.New(conf.Client)

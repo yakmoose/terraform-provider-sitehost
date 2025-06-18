@@ -7,10 +7,8 @@ import (
 
 // DataSource returns a schema with the function to read cloud stack resource.
 func DataSource() *schema.Resource {
-	recordSchema := userDataSourceSchema()
-
 	return &schema.Resource{
 		ReadContext: readResource,
-		Schema:      recordSchema,
+		Schema:      userDataSourceSchema,
 	}
 }

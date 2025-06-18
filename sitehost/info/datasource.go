@@ -12,11 +12,10 @@ import (
 
 // DataSource returns a schema with the function to read api info resource.
 func DataSource() *schema.Resource {
-	recordSchema := apiInfoDataSourceSchema()
 
 	return &schema.Resource{
 		ReadContext: readDataSource,
-		Schema:      recordSchema,
+		Schema:      apiInfoDataSourceSchema,
 	}
 }
 

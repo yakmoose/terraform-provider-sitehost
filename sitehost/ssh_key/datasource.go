@@ -11,7 +11,7 @@ import (
 
 // DataSource returns a schema with the function to read Server resource.
 func DataSource() *schema.Resource {
-	recordSchema := sshKeyDataSourceSchema()
+	recordSchema := sshKeyDataSourceSchema
 
 	return &schema.Resource{
 		ReadContext: readDataSource,
@@ -23,7 +23,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listDataSource,
-		Schema:      listSSHKeysDataSourceSchema(),
+		Schema:      listSSHKeysDataSourceSchema,
 	}
 }
 
