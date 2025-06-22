@@ -35,10 +35,15 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := sshkey.New(conf.Client)
 
+	customImageAccess, ok := d.Get("custom_image_access").(bool)
+	if !ok {
+		return diag.Errorf("failed to convert custom_image_access to bool")
+	}
+
 	opts := sshkey.CreateRequest{
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: d.Get("custom_image_access").(bool),
+		CustomImageAccess: customImageAccess,
 	}
 
 	res, err := client.Create(ctx, opts)

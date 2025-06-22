@@ -17,6 +17,8 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall/securitygroups"
 	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 
@@ -61,21 +63,22 @@ func New(version string) func() *schema.Provider {
 				"sitehost_ssh_keys": sshkey.ListDataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
+				"sitehost_stack_name":           stack.NameResource(),
+				"sitehost_stack":                stack.Resource(),
+				"sitehost_stack_environment":    environment.Resource(),
 				"sitehost_cloud_database":       db.Resource(),
 				"sitehost_cloud_database_user":  db_user.Resource(),
 				"sitehost_cloud_database_grant": grant.Resource(),
-
-				"sitehost_cloud_ssh_user": ssh_user.Resource(),
+				"sitehost_cloud_ssh_user":       ssh_user.Resource(),
 
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
 
-				"sitehost_server":  server.Resource(),
 				"sitehost_ssh_key": sshkey.Resource(),
 
-				"sitehost_stack_name":        stack.NameResource(),
-				"sitehost_stack":             stack.Resource(),
-				"sitehost_stack_environment": environment.Resource(),
+				"sitehost_server":                server.Resource(),
+				"sitehost_server_security_group": securitygroups.Resource(),
+				"sitehost_server_firewall":       firewall.Resource(),
 			},
 		}
 

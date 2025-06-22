@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
@@ -116,7 +115,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			return diag.Errorf("Error updating environment info: %s", err)
 		}
 
-		if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+		if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 			return diag.FromErr(err)
 		}
 	}

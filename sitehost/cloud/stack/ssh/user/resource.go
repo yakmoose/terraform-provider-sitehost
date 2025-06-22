@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/ssh/user"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -157,7 +156,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error creating ssh user: server %s, username %s, %s", addRequest.ServerName, addRequest.Username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -214,7 +213,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error updating ssh user: server %s, username %s, %s", updateRequest.ServerName, updateRequest.Username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -243,7 +242,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error deleting ssh user: server %s, username %s, %s", serverName, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 

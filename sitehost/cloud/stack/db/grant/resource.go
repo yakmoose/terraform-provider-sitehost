@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db/grant"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db/user"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/gosh/pkg/models"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
@@ -111,7 +110,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error retrieving database grants: server %s, host %s, database %s, username %s, %s", serverName, mysqlHost, database, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -143,7 +142,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error updating database grant: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -174,7 +173,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error removing database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{ID: response.Return.ID, Type: response.Return.Type}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 

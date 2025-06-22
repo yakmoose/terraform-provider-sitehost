@@ -4,6 +4,7 @@ package helper
 import (
 	"context"
 	"errors"
+	"github.com/sitehostnz/gosh/pkg/models"
 	"log"
 	"net/url"
 	"time"
@@ -67,16 +68,21 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	}, nil
 }
 
-// WaitForAction is a function to check the Job status in a refresh function.
-func WaitForAction(client *api.Client, request job.GetRequest) error {
+// WaitForJob is a function to check the Job status in a refresh function.
+// func WaitForJob(client *api.Client, jobID string, jobType string) error {
+func WaitForJob(client *api.Client, aJob models.Job) error {
 	var (
 		pending   = JobStatusPending
 		target    = JobStatusCompleted
 		ctx       = context.Background()
 		refreshFn = func() (result any, state string, err error) {
-			svc := job.New(client)
+			client := job.New(client)
 
-			j, err := svc.Get(ctx, request)
+			j, err := client.Get(ctx, job.GetRequest{
+				ID:   aJob.ID,
+				Type: aJob.Type,
+			})
+
 			if err != nil {
 				return nil, "", err
 			}

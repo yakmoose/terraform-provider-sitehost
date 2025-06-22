@@ -1,7 +1,40 @@
 # Changelog
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [v1.x.x] 2025-
+## [v1.x.x] 2025-06-18
+### Added 
+- Added `sitehost_stack_name` resource.
+- Added `sitehost_stack` resource.
+- Added `sitehost_stack_environment` resource.
+- Added `sitehost_cloud_database` resource.
+- Added `sitehost_cloud_database_user` resource.
+- Added `sitehost_cloud_database_grant` resource.
+- Added `sitehost_cloud_ssh_user` resource.
+
+- Added `sitehost_cloud_database` data source.
+- Added `sitehost_cloud_databases` data source.
+- Added `sitehost_cloud_database_grant` data source.
+- Added `sitehost_cloud_ssh_user` data source.
+- Added `sitehost_server` data source.
+- Added `sitehost_stack` data source.
+- Added `sitehost_stacks` data source.
+- Added `sitehost_stack_environment` data source.
+- Added `sitehost_ssh_key` data source.
+- Added `sitehost_ssh_keys` data source.
+
+### Fixed
+
+### Updated
+- Update to GoSH v0.6.0
+
+## [v1.3.0] 2025-06-12
+### Added
+- Added `sitehost_server_firewall` resource.
+- Added `sitehost_server_security_group` resource.
+
+### Updated
+- Updated GoSH version to v0.5.0.
+
 ## [v1.2.0] 2024-03-13
 ### Added
 - Added `sitehost_ssh_key` resource.
