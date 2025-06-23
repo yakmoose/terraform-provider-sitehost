@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/grant"
@@ -16,6 +15,7 @@ import (
 	ssh_user "github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/ssh/user"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall/securitygroups"
@@ -45,7 +45,7 @@ func New(version string) func() *schema.Provider {
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_api": api.DataSource(),
+				"sitehost_info": info.DataSource(),
 
 				"sitehost_cloud_database":       db.DataSource(),
 				"sitehost_cloud_databases":      db.ListDataSource(),

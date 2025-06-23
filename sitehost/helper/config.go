@@ -4,7 +4,6 @@ package helper
 import (
 	"context"
 	"errors"
-	"github.com/sitehostnz/gosh/pkg/models"
 	"log"
 	"net/url"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/sitehostnz/gosh/pkg/api"
 	"github.com/sitehostnz/gosh/pkg/api/job"
+	"github.com/sitehostnz/gosh/pkg/models"
 )
 
 const (
@@ -69,7 +69,6 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 }
 
 // WaitForJob is a function to check the Job status in a refresh function.
-// func WaitForJob(client *api.Client, jobID string, jobType string) error {
 func WaitForJob(client *api.Client, aJob models.Job) error {
 	var (
 		pending   = JobStatusPending
@@ -82,7 +81,6 @@ func WaitForJob(client *api.Client, aJob models.Job) error {
 				ID:   aJob.ID,
 				Type: aJob.Type,
 			})
-
 			if err != nil {
 				return nil, "", err
 			}

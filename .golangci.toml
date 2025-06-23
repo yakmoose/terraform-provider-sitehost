@@ -1,35 +1,13 @@
-<<<<<<< HEAD
 version = '2'
-=======
-[run]
-timeout = "10m"
-
-[issues]
-exclude-use-default = false
-new = true
-new-from-rev = "master"
-
-# BUG(colin): https://github.com/kunwardeep/paralleltest/issues/8
-[[issues.exclude-rules]]
-linters = [ "paralleltest" ]
-text = "does not use range value in test Run"
-
-[[issues.exclude-rules]]
-path = "_test\\.go"
-linters = [ "funlen", "cyclop" ]
-
-[[issues.exclude-rules]]
-path = "test"
-linters = [ "funlen", "cyclop" ]
->>>>>>> 626a758133e7e28499b527b7d7a27565481e96be
 
 [linters]
 default = 'none'
 enable = [
-<<<<<<< HEAD
   'asciicheck',
   'bodyclose',
+  'copyloopvar',
   'cyclop',
+  'decorder',
   'dogsled',
   'durationcheck',
   'errcheck',
@@ -44,6 +22,7 @@ enable = [
   'goprintffuncname',
   'gosec',
   'govet',
+  'importas',
   'ineffassign',
   'makezero',
   'misspell',
@@ -65,56 +44,6 @@ enable = [
   'unused',
   'wastedassign',
   'whitespace'
-=======
-  "asciicheck",
-  "bodyclose",
-  "copyloopvar",
-  "cyclop",
-  "decorder",
-  "dogsled",
-  # "dupl", // disabled because it cannot be nolint-ed
-  "durationcheck",
-  "errcheck",
-  "exhaustive",
-  "exportloopref",
-  "forcetypeassert",
-  "funlen",
-  "gci",
-  "gocognit",
-  "goconst",
-  "gocritic",
-  "godot",
-  "gofmt",
-  "gofumpt",
-  "goimports",
-  "gomoddirectives",
-  "goprintffuncname",
-  "gosimple",
-  "gosec",
-  "govet",
-  "ineffassign",
-  "makezero",
-  "misspell",
-  "nakedret",
-  "nestif",
-  "nilerr",
-  "noctx",
-  "nolintlint",
-  "paralleltest",
-  "prealloc",
-  "predeclared",
-  "revive",
-  "rowserrcheck",
-  "sqlclosecheck",
-  "staticcheck",
-  "stylecheck",
-  "thelper",
-  "unconvert",
-  "unparam",
-  "unused",
-  "wastedassign",
-  "whitespace",
->>>>>>> 626a758133e7e28499b527b7d7a27565481e96be
 ]
 
 [linters.settings]
@@ -151,6 +80,10 @@ linters = [
   'funlen'
 ]
 path = 'test'
+
+[issues]
+new-from-rev = 'main'
+new = true
 
 [formatters]
 enable = [

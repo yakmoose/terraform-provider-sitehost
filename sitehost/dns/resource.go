@@ -72,7 +72,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 	if !response.Status {
 		return diag.Errorf("Error retrieving domain: %s", response.Msg)
 	}
-	
+
 	return nil
 }
 
@@ -137,7 +137,6 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		Content:  domainRecord.Content,
 		Priority: domainRecord.Priority,
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -150,7 +149,6 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		ID:         resp.Return.ID,
 		DomainName: domainRecord.Domain,
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}
@@ -243,7 +241,6 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		ID:         d.Id(),
 		DomainName: fmt.Sprintf("%v", d.Get("domain")),
 	})
-
 	if err != nil {
 		return diag.Errorf("Error creating DNS record: %s", err)
 	}

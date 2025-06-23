@@ -2,7 +2,6 @@ package sshkey
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sshkey "github.com/sitehostnz/gosh/pkg/api/ssh/key"
@@ -75,9 +74,7 @@ func listDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 			"content":      v.Content,
 			"date_added":   v.DateAdded,
 			"date_updated": v.DateUpdated,
-			// "custom_image_access": v.CustomImageAccess,
-
-			// I've intentionally left out the grants here
+			// "custom_image_access": strconv.FormatBool(bool(v.CustomImageAccess)),
 		}
 
 		sshKeys = append(sshKeys, k)

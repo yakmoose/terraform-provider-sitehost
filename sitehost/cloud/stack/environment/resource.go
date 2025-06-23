@@ -53,7 +53,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		ctx,
 		environment.GetRequest{ServerName: serverName, Project: project, Service: service},
 	)
-
 	if err != nil {
 		return diag.Errorf("Error retrieving environment info: %s", err)
 	}

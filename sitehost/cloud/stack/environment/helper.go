@@ -6,7 +6,7 @@ import (
 	"github.com/sitehostnz/gosh/pkg/models"
 )
 
-func createEnvironmentVariableChangeSet(newValues, oldValues interface{}) []models.EnvironmentVariable {
+func createEnvironmentVariableChangeSet(oldValues, newValues interface{}) []models.EnvironmentVariable {
 	var environmentVariables []models.EnvironmentVariable
 
 	newV, ok := newValues.(map[string]interface{})

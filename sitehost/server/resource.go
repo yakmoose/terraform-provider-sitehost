@@ -13,7 +13,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
-// Resource returns a schema with the operations for server.
+// Resource returns a schema with the operations for a server.
 func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createResource,
@@ -101,7 +101,6 @@ func readResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diag
 	resp, err := client.Get(context.Background(), server.GetRequest{
 		ServerName: d.Id(),
 	})
-
 	if err != nil {
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
@@ -143,7 +142,6 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 		Name: d.Id(),
 		Plan: fmt.Sprint(d.Get("product_code")),
 	})
-
 	if err != nil {
 		return diag.Errorf("Error upgrading server: %s", err)
 	}
