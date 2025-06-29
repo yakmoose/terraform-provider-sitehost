@@ -1,21 +1,33 @@
 package sshkey
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 // resourceSchema is the schema with values for a SSH Key resource.
 var resourceSchema = map[string]*schema.Schema{
 	"label": {
-		Type:        schema.TypeString,
-		Required:    true,
-		ForceNew:    true,
+		Type:     schema.TypeString,
+		Required: true,
+		// don't want things re-keying if they are updated
+		ForceNew:    false,
 		Description: "The `label` is the name of the SSH Key, and is displayed in CP.",
 	},
 	"content": {
-		Type:        schema.TypeString,
-		Sensitive:   true,
-		Required:    true,
-		ForceNew:    true,
+		Type: schema.TypeString,
+		// It's a public key, it's right there in the name, public keys are not sensitive.
+		Sensitive: false,
+		Required:  true,
+		// don't want things re-keying if they are updated
+		ForceNew:    false,
 		Description: "The `content` is the contents of the public key.",
+		DiffSuppressFunc: func(_, oldValue, newValue string, _ *schema.ResourceData) bool {
+			// we need this in place, since the keys may end up with whitespace and crap, so make sure we're
+			// just looking at the key
+			return strings.TrimSpace(oldValue) == strings.TrimSpace(newValue)
+		},
 	},
 	"custom_image_access": {
 		Type:     schema.TypeBool,

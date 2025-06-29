@@ -13,7 +13,7 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
-// Resource returns a schema with the operations for server.
+// Resource returns a schema with the operations for a server.
 func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: createResource,
@@ -56,31 +56,31 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		},
 	}
 
-	res, err := client.Create(ctx, opts)
+	response, err := client.Create(ctx, opts)
 	if err != nil {
 		return diag.Errorf("Error creating server: %s", err)
 	}
 
-	if !res.Status {
-		return diag.Errorf("Error creating server: %s", res.Msg)
+	if !response.Status {
+		return diag.Errorf("Error creating server: %s", response.Msg)
 	}
 
 	// Set data
-	d.SetId(res.Return.Name)
-	if err := d.Set("name", res.Return.Name); err != nil {
+	d.SetId(response.Return.Name)
+	if err := d.Set("name", response.Return.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("password", res.Return.Password); err != nil {
+	if err := d.Set("password", response.Return.Password); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("ips", res.Return.Ips); err != nil {
+	if err := d.Set("ips", response.Return.Ips); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// wait for "Completed" status
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -150,7 +150,7 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 		return diag.Errorf("Error upgrading server: %s", res.Msg)
 	}
 
-	resp, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{
+	response, err := client.CommitDiskChanges(context.Background(), server.CommitDiskChangesRequest{
 		ServerName: d.Id(),
 	})
 	if err != nil {
@@ -161,7 +161,7 @@ func upgradePlan(conf *helper.CombinedConfig, client *server.Client, d *schema.R
 		return diag.Errorf("Error upgrading server: %s", res.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(resp.Return.Job.ID), fmt.Sprint(resp.Return.Job.Type)); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -194,18 +194,18 @@ func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Di
 
 	client := server.New(conf.Client)
 
-	resp, err := client.Delete(context.Background(), server.DeleteRequest{
+	response, err := client.Delete(context.Background(), server.DeleteRequest{
 		Name: d.Id(),
 	})
 	if err != nil {
 		return diag.Errorf("Error deleting server: %s", err)
 	}
 
-	if !resp.Status {
-		return diag.Errorf("Error deleting server: %s", resp.Msg)
+	if !response.Status {
+		return diag.Errorf("Error deleting server: %s", response.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(resp.Return.Job.ID), fmt.Sprint(resp.Return.Job.Type)); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 

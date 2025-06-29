@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/gosh/pkg/models"
+	"github.com/sitehostnz/gosh/pkg/net"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -38,14 +39,14 @@ func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 	domain := fmt.Sprintf("%v", d.Get("name"))
 
-	// The response don't have the domain name, so we need to get it from the request.
-	resp, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domain})
+	// The responses don't have the domain name, so we need to get it from the request.
+	responsw, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domain})
 	if err != nil {
 		return diag.Errorf("Error creating domain: %s", err)
 	}
 
-	if !resp.Status {
-		return diag.Errorf("Error creating domain: %s", resp.Msg)
+	if !responsw.Status {
+		return diag.Errorf("Error creating domain: %s", responsw.Msg)
 	}
 
 	d.SetId(domain)
@@ -72,17 +73,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.Errorf("Error retrieving domain: %s", response.Msg)
 	}
 
-	// iterate over the domains to find the one we are looking for.
-	for _, domain := range response.Return {
-		if domain.Name == d.Id() {
-			if err := d.Set("name", domain.Name); err != nil {
-				return diag.FromErr(err)
-			}
-			return nil
-		}
-	}
-
-	return diag.Errorf("Error finding the domain")
+	return nil
 }
 
 // deleteZoneResource is a function to delete a DNS Zone.
@@ -126,11 +117,15 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("failed to convert meta object")
 	}
 
+	domain := fmt.Sprintf("%v", d.Get("domain"))
+	name := net.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
+
 	domainRecord := models.DNSRecord{
-		Name:     fmt.Sprintf("%v", d.Get("name")),
-		Domain:   fmt.Sprintf("%v", d.Get("domain")),
-		Type:     fmt.Sprintf("%v", d.Get("type")),
+		Name:     strings.TrimSuffix(name, "."),
+		Domain:   domain,
 		Content:  fmt.Sprintf("%v", d.Get("record")),
+		Type:     fmt.Sprintf("%v", d.Get("type")),
+		TTL:      fmt.Sprintf("%v", d.Get("ttl")),
 		Priority: fmt.Sprintf("%v", d.Get("priority")),
 	}
 
@@ -177,15 +172,15 @@ func readRecordResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	resp, err := client.GetRecord(ctx, dns.RecordRequest{
+	record, err := client.GetRecord(ctx, dns.RecordRequest{
 		ID:         d.Id(),
 		DomainName: domain,
 	})
 	if err != nil {
-		return diag.Errorf("Error retrieving DNS zone: %s", err)
+		return diag.Errorf("Error retrieving DNS record: %s", err)
 	}
 
-	if err := setRecordAttributes(d, resp); err != nil {
+	if err := setRecordAttributes(d, record); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -230,7 +225,7 @@ func updateRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 			RecordID: d.Id(),
 			Type:     fmt.Sprintf("%v", d.Get("type")),
 			Name:     fmt.Sprintf("%v", d.Get("name")),
-			Content:  fmt.Sprintf("%v", d.Get("record")),
+			Content:  fmt.Sprintf("%v", d.Get("content")),
 			Priority: fmt.Sprintf("%v", d.Get("priority")),
 		},
 	)
@@ -278,11 +273,10 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	if err := d.Set("domain", record.Domain); err != nil {
 		return err
 	}
-
 	if err := d.Set("name", record.Name); err != nil {
+		// 	} else {
 		return err
 	}
-
 	if err := d.Set("type", record.Type); err != nil {
 		return err
 	}
@@ -291,11 +285,9 @@ func setRecordAttributes(d *schema.ResourceData, record models.DNSRecord) error 
 	if err != nil {
 		priority = 0
 	}
-
 	if err := d.Set("priority", priority); err != nil {
 		return err
 	}
-
 	if err := d.Set("record", record.Content); err != nil {
 		return err
 	}

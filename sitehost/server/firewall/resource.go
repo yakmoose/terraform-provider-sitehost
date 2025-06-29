@@ -74,12 +74,12 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		groups = append(groups, fmt.Sprint(v))
 	}
 
-	res, diags := updateFirewallGroups(ctx, client, serverName, groups)
+	response, diags := updateFirewallGroups(ctx, client, serverName, groups)
 	if diags != nil {
 		return diags
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -101,12 +101,12 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("failed to convert server name to string")
 	}
 
-	res, diags := updateFirewallGroups(ctx, client, serverName, []string{})
+	response, diags := updateFirewallGroups(ctx, client, serverName, []string{})
 	if diags != nil {
 		return diags
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 

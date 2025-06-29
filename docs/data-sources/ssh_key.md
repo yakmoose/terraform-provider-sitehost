@@ -22,7 +22,7 @@ description: |-
 
 ### Optional
 
-- `custom_image_access` (String) `custom_image_access` determines whether the key can be used to access custom images.
+- `custom_image_access` (Boolean) `custom_image_access` determines whether the key can be used to access custom images.
 
 ### Read-Only
 

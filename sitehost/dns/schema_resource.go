@@ -1,8 +1,12 @@
 package dns
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/sitehostnz/gosh/pkg/net"
 )
 
 // resourceZoneSchema is the schema with values for a DNS zone resource.
@@ -29,13 +33,23 @@ var resourceRecordSchema = map[string]*schema.Schema{
 	"name": {
 		Type:         schema.TypeString,
 		Required:     true,
+		ForceNew:     false,
 		ValidateFunc: validation.NoZeroValues,
 		Description:  "The subdomain",
+		DiffSuppressFunc: func(_, oldValue, newValue string, d *schema.ResourceData) bool {
+			domain := fmt.Sprintf("%v", d.Get("domain"))
+
+			oldValue = net.ConstructFqdn(fmt.Sprintf("%v.", oldValue), domain)
+			newValue = net.ConstructFqdn(newValue, domain)
+
+			return newValue == oldValue
+		},
 	},
 
 	"type": {
 		Type:     schema.TypeString,
 		Required: true,
+		ForceNew: true,
 		ValidateFunc: validation.StringInSlice([]string{
 			"A",
 			"AAAA",
@@ -44,6 +58,7 @@ var resourceRecordSchema = map[string]*schema.Schema{
 			"MX",
 			"TXT",
 			"SRV",
+			"NS", // added this back, as creating a zone does not appear to set the DNS records
 		}, false),
 		Description: "The record type",
 	},
@@ -56,9 +71,27 @@ var resourceRecordSchema = map[string]*schema.Schema{
 		Default:      0,
 	},
 
+	"ttl": {
+		Type:         schema.TypeInt,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validation.IntAtLeast(1),
+	},
+
 	"record": {
 		Type:     schema.TypeString,
 		Optional: true,
+		DiffSuppressFunc: func(_, oldRecord, newRecord string, _ *schema.ResourceData) bool {
+			// bloody dots at the end of records...
+			// we have to do this, mainly for NS and CNAME records
+			// Possibly MX records too... hell, let's just do them all
+			return strings.TrimSuffix(oldRecord, ".") == strings.TrimSuffix(newRecord, ".")
+		},
+	},
+
+	"fqdn": {
+		Type:     schema.TypeString,
+		Computed: true,
 	},
 
 	"change_date": {

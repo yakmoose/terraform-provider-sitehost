@@ -82,16 +82,16 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		},
 	}
 
-	res, err := client.Update(ctx, opts)
+	response, err := client.Update(ctx, opts)
 	if err != nil {
 		return diag.Errorf("Error updating security group: %s", err)
 	}
 
-	if !res.Status {
-		return diag.Errorf("Error updating security group: %s", res.Msg)
+	if !response.Status {
+		return diag.Errorf("Error updating security group: %s", response.Msg)
 	}
 
-	if err := helper.WaitForAction(conf.Client, fmt.Sprint(res.Return.Job.ID), res.Return.Job.Type); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 

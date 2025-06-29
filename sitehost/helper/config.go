@@ -9,9 +9,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/sitehostnz/gosh/pkg/api"
 	"github.com/sitehostnz/gosh/pkg/api/job"
+	"github.com/sitehostnz/gosh/pkg/models"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 	// JobStatusFailed is the status for a failed job.
 	JobStatusFailed = "Failed"
 	// JobRequestDelay is the time wait to send a new request to check the job status.
-	JobRequestDelay = 10 * time.Second
+	JobRequestDelay = 1 * time.Second
 	// JobRequestTimeout is the time to wait before timeout.
 	JobRequestTimeout = 60 * time.Minute
 	// JobRequestMinTimeout is the minimum time to wait before refreshes.
@@ -67,18 +68,18 @@ func (c *Config) Client() (*CombinedConfig, diag.Diagnostics) {
 	}, nil
 }
 
-// WaitForAction is a function to check the Job status in a refresh function.
-func WaitForAction(client *api.Client, jobID string, jobType string) error {
+// WaitForJob is a function to check the Job status in a refresh function.
+func WaitForJob(client *api.Client, aJob models.Job) error {
 	var (
 		pending   = JobStatusPending
 		target    = JobStatusCompleted
 		ctx       = context.Background()
 		refreshFn = func() (result any, state string, err error) {
-			svc := job.New(client)
+			client := job.New(client)
 
-			j, err := svc.Get(ctx, job.GetRequest{
-				JobID: jobID,
-				Type:  jobType,
+			j, err := client.Get(ctx, job.GetRequest{
+				ID:   aJob.ID,
+				Type: aJob.Type,
 			})
 			if err != nil {
 				return nil, "", err
@@ -99,7 +100,7 @@ func WaitForAction(client *api.Client, jobID string, jobType string) error {
 		}
 	)
 
-	_, err := (&resource.StateChangeConf{
+	_, err := (&retry.StateChangeConf{
 		Pending:        []string{pending},
 		Refresh:        refreshFn,
 		Target:         []string{target},

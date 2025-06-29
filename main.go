@@ -22,6 +22,7 @@ func main() {
 	opts := &plugin.ServeOpts{
 		Debug:        debugMode,
 		ProviderFunc: sitehost.New(version),
+		ProviderAddr: "sitehostnz/sitehost",
 	}
 
 	plugin.Serve(opts)

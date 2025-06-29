@@ -42,3 +42,4 @@ dist/
 examples/kubernetes/kubeconfig
 
 terraform-provider-sitehost
+/go.work
