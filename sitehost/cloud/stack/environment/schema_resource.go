@@ -2,6 +2,7 @@ package environment
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // stackDataSourceSchema returns a schema with the function to read Server resource.
@@ -29,7 +30,9 @@ var resourceSchema = map[string]*schema.Schema{
 		Type:     schema.TypeMap,
 		Required: true,
 		Elem: &schema.Schema{
-			Type: schema.TypeString,
+			Type:         schema.TypeString,
+			Required:     true,
+			ValidateFunc: validation.StringIsNotWhiteSpace,
 		},
 	},
 }

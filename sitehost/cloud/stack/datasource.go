@@ -3,6 +3,7 @@ package stack
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
@@ -11,11 +12,9 @@ import (
 
 // DataSource returns a schema with the function to read cloud stack resource.
 func DataSource() *schema.Resource {
-	recordSchema := stackDataSourceSchema()
-
 	return &schema.Resource{
 		ReadContext: readResource,
-		Schema:      recordSchema,
+		Schema:      stackDataSourceSchema,
 	}
 }
 
@@ -23,7 +22,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listResource,
-		Schema:      listStackDataSourceSchema(),
+		Schema:      listStackDataSourceSchema,
 	}
 }
 

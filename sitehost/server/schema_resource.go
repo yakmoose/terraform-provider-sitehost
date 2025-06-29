@@ -27,7 +27,7 @@ var resourceSchema = map[string]*schema.Schema{
 	"label": {
 		Type:        schema.TypeString,
 		Required:    true,
-		Description: "The SiteHost's label is for display purposes only.",
+		Description: "The server's label. This is for display purposes only.",
 	},
 	"location": {
 		Type:     schema.TypeString,
@@ -40,6 +40,12 @@ var resourceSchema = map[string]*schema.Schema{
 		Type:        schema.TypeString,
 		Required:    true,
 		Description: "The product code of the server to be deployed, determining the price and size.",
+	},
+	"securitygroups": {
+		Type:        schema.TypeList,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+		Description: "The security groups which this server uses.",
 	},
 	"image": {
 		Type:     schema.TypeString,

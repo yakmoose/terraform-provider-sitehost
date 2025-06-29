@@ -1,2 +1,2 @@
-// Package info represents our SiteHost `/info` API endpoint.
+// Package api represents our SiteHost `/api` API endpoint.
 package info

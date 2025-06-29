@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -20,7 +19,7 @@ func Resource() *schema.Resource {
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
 
-		// assume this is correct here.... wheeeee
+		// assume this is correct here....
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
@@ -36,9 +35,11 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	client := db.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	database := fmt.Sprintf("%v", d.Get("name"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	database := fmt.Sprint(d.Get("name"))
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
 	response, err := client.Get(
 		ctx,
@@ -52,7 +53,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("error retrieving stack: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 	if err := d.Set("backup_container", response.Database.Container); err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,10 +68,12 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	database := fmt.Sprintf("%v", d.Get("name"))
-	container := fmt.Sprintf("%v", d.Get("backup_container"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	database := fmt.Sprint(d.Get("name"))
+	container := fmt.Sprint(d.Get("backup_container"))
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
 	response, err := client.Add(
 		ctx,
@@ -86,9 +88,7 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error retrieving db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
-
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -103,10 +103,10 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	database := fmt.Sprintf("%v", d.Get("name"))
-	container := fmt.Sprintf("%v", d.Get("backup_container"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	database := fmt.Sprint(d.Get("name"))
+	container := fmt.Sprint(d.Get("backup_container"))
 
 	_, err := client.Update(
 		ctx,
@@ -132,9 +132,9 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	client := db.New(conf.Client)
 
-	serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
-	database := fmt.Sprintf("%v", d.Get("name"))
+	serverName := fmt.Sprint(d.Get("server_name"))
+	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
+	database := fmt.Sprint(d.Get("name"))
 
 	response, err := client.Delete(
 		ctx,
@@ -148,7 +148,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error removing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -156,8 +156,8 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 }
 
 func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+	// todo: make database name parser helper
 	split := strings.Split(d.Id(), "/")
-
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[mysql_host]/[database]", d.Id())
 	}
@@ -165,6 +165,8 @@ func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema
 	serverName := split[0]
 	mysqlHost := split[1]
 	database := split[2]
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, database))
 
 	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, name %s, database %s, %s", serverName, mysqlHost, database, err)

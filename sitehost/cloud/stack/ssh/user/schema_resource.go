@@ -27,25 +27,20 @@ var resourceSchema = map[string]*schema.Schema{
 		),
 	},
 
-	// this is a one way trip.....
+	// this is a one-way trip...
 	// can't read it back...
 	"password": {
 		Type:        schema.TypeString,
 		Sensitive:   true,
 		Optional:    true,
 		Description: "The password for the user",
-
-		// DiffSuppressOnRefresh: true,
-		// DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-		//	// how to check/handle this...
-		//	return true
-		// },
 	},
 
 	"read_only_config": {
 		Type:     schema.TypeBool,
 		Optional: true,
-		Default:  false,
+		Default:  nil,
+		Computed: true,
 	},
 
 	"ssh_key": {
@@ -78,7 +73,7 @@ var resourceSchema = map[string]*schema.Schema{
 
 	// not sure how to validate this correctly
 	// since we can only have one or the other...
-	// this is a lit of containers the user has access to
+	// this is a list of containers the user has access to
 	"container": {
 		Type:     schema.TypeList,
 		Optional: true,

@@ -35,10 +35,15 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 
 	client := sshkey.New(conf.Client)
 
+	customImageAccess, ok := d.Get("custom_image_access").(bool)
+	if !ok {
+		return diag.Errorf("failed to convert custom_image_access to bool")
+	}
+
 	opts := sshkey.CreateRequest{
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
-		CustomImageAccess: d.Get("custom_image_access").(bool),
+		CustomImageAccess: customImageAccess,
 	}
 
 	res, err := client.Create(ctx, opts)
@@ -101,7 +106,7 @@ func setData(res sshkey.GetResponse, d *schema.ResourceData) diag.Diagnostics {
 }
 
 // readResource is a function to read a new server.
-func readResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func readResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -109,7 +114,7 @@ func readResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diag
 
 	client := sshkey.New(conf.Client)
 
-	resp, err := client.Get(context.Background(), sshkey.GetRequest{
+	resp, err := client.Get(ctx, sshkey.GetRequest{
 		ID: d.Id(),
 	})
 	if err != nil {
@@ -137,15 +142,15 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	client := sshkey.New(conf.Client)
 
 	if d.HasChange("label") || d.HasChange("content") || d.HasChange("custom_image_access") {
-		updateKey(client, d)
+		updateKey(ctx, client, d)
 	}
 
 	return readResource(ctx, d, meta)
 }
 
 // updateKey is a function to update an SSH Key.
-func updateKey(client *sshkey.Client, d *schema.ResourceData) diag.Diagnostics {
-	res, err := client.Update(context.Background(), sshkey.UpdateRequest{
+func updateKey(ctx context.Context, client *sshkey.Client, d *schema.ResourceData) diag.Diagnostics {
+	res, err := client.Update(ctx, sshkey.UpdateRequest{
 		ID:                d.Id(),
 		Label:             fmt.Sprint(d.Get("label")),
 		Content:           fmt.Sprint(d.Get("content")),
@@ -163,7 +168,7 @@ func updateKey(client *sshkey.Client, d *schema.ResourceData) diag.Diagnostics {
 }
 
 // deleteResource is a function to delete an SSH Key.
-func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func deleteResource(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	conf, ok := meta.(*helper.CombinedConfig)
 	if !ok {
 		return diag.Errorf("failed to convert meta object")
@@ -171,7 +176,7 @@ func deleteResource(_ context.Context, d *schema.ResourceData, meta any) diag.Di
 
 	client := sshkey.New(conf.Client)
 
-	resp, err := client.Delete(context.Background(), sshkey.DeleteRequest{
+	resp, err := client.Delete(ctx, sshkey.DeleteRequest{
 		ID: d.Id(),
 	})
 	if err != nil {

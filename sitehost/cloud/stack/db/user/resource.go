@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/db/user"
-	"github.com/sitehostnz/gosh/pkg/api/job"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -24,7 +23,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
-		Schema: databaseUserResourceSchema(),
+		Schema: databaseUserResourceSchema,
 	}
 }
 
@@ -41,7 +40,9 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
 	username := fmt.Sprintf("%v", d.Get("username"))
 
-	response, err := client.Get(
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, username))
+
+	_, err := client.Get(
 		ctx,
 		user.GetRequest{
 			ServerName: serverName,
@@ -52,8 +53,6 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s", response.User.ServerName, response.User.MysqlHost, response.User.Username))
 
 	return nil
 }
@@ -68,9 +67,11 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	serverName := fmt.Sprintf("%v", d.Get("server_name"))
 	mysqlHost := fmt.Sprintf("%v", d.Get("mysql_host"))
+	database := fmt.Sprintf("%v", d.Get("database"))
 	username := fmt.Sprintf("%v", d.Get("username"))
 	password := fmt.Sprintf("%v", d.Get("password"))
-	database := fmt.Sprintf("%v", d.Get("database"))
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, username))
 
 	response, err := client.Add(
 		ctx,
@@ -83,14 +84,12 @@ func createResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		},
 	)
 	if err != nil {
-		return diag.Errorf("error retrieving database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
+		return diag.Errorf("error creating database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, username))
 
 	return nil
 }
@@ -121,7 +120,7 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error updating database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -152,7 +151,7 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diag.Errorf("error removing database user: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)
 	}
 
-	if err := helper.WaitForAction(conf.Client, job.GetRequest{JobID: response.Return.JobID, Type: job.SchedulerType}); err != nil {
+	if err := helper.WaitForJob(conf.Client, response.Return.Job); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -161,8 +160,8 @@ func deleteResource(ctx context.Context, d *schema.ResourceData, meta interface{
 
 // importResource is a function to import a stack database user.
 func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
+	// todo: create parser for database user
 	split := strings.Split(d.Id(), "/")
-
 	if len(split) != 3 {
 		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[mysql_host]/[username]", d.Id())
 	}
@@ -170,6 +169,8 @@ func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema
 	serverName := split[0]
 	mysqlHost := split[1]
 	username := split[2]
+
+	d.SetId(fmt.Sprintf("%s/%s/%s", serverName, mysqlHost, username))
 
 	if err := d.Set("server_name", serverName); err != nil {
 		return nil, fmt.Errorf("error importing db: server %s, host %s, username %s, %s", serverName, mysqlHost, username, err)

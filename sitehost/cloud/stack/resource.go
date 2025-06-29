@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/cloud/stack"
-	"github.com/sitehostnz/gosh/pkg/api/cloud/stack/environment"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 	"gopkg.in/yaml.v3"
 )
@@ -39,6 +37,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	serverName := fmt.Sprintf("%v", d.Get("server_name"))
 	name := fmt.Sprintf("%v", d.Get("name"))
+	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
 
 	stackClient := stack.New(conf.Client)
 	stackResponse, err := stackClient.Get(ctx, stack.GetRequest{ServerName: serverName, Name: name})
@@ -46,54 +45,35 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.Errorf("Error retrieving stack info: server %s, stack %s, %s", serverName, name, err)
 	}
 
-	stack := stackResponse.Stack
-
-	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
-	if err := d.Set("server_ip_address", stack.IPAddress); err != nil {
+	s := stackResponse.Stack
+	if err := d.Set("server_ip_address", s.IPAddress); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("server_label", stack.Server); err != nil {
+	if err := d.Set("server_label", s.Server); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("docker_file", stack.DockerFile); err != nil {
+	if err := d.Set("docker_file", s.DockerFile); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("label", stack.Label); err != nil {
+	if err := d.Set("label", s.Label); err != nil {
 		return diag.FromErr(err)
 	}
 
-	environmentClient := environment.New(conf.Client)
-	environmentVariablesResponse, err := environmentClient.Get(ctx, environment.GetRequest{ServerName: serverName, Project: name, Service: name})
-	if err != nil {
-		return diag.Errorf("Error retrieving environment info: server %s, stack %s, %s", serverName, name, err)
-	}
-	settings := map[string]string{}
-	for _, v := range environmentVariablesResponse.EnvironmentVariables {
-		settings[v.Name] = v.Content
-	}
-
-	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
 	if err := d.Set("server_name", serverName); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if len(settings) > 0 {
-		if err := d.Set("settings", settings); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
 	// unmarshall the docker file so we can get bits out of it.
 	dockerFile := Compose{}
-	if err := yaml.Unmarshal([]byte(stack.DockerFile), &dockerFile); err != nil {
+	if err := yaml.Unmarshal([]byte(s.DockerFile), &dockerFile); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// set the docker file here, for fun/read it back...
-	if err := d.Set("docker_file", stack.DockerFile); err != nil {
+	if err := d.Set("docker_file", s.DockerFile); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -102,32 +82,16 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	// things that exist in the yaml from the server
 
 	// 1. virtual hosts
-	var aliases []string
-	for i := range dockerFile.Services[stack.Name].Environment {
-		s := dockerFile.Services[stack.Name].Environment[i]
-		if strings.HasPrefix(s, "VIRTUAL_HOST=") {
-			aliases = strings.Split(
-				strings.TrimPrefix(s, "VIRTUAL_HOST="),
-				",",
-			)
-			aliases = helper.Filter(aliases, func(s string) bool { return s != stack.Label })
-			break
-		}
-	}
-
+	aliases := extractAliasesFromDockerFile(dockerFile, s)
 	if err := d.Set("aliases", aliases); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// what happens when these things go missing?
-	// and what do we need?
-	// container type
-	// does this have any impacts on things
-	if err := d.Set("type", extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.type")); err != nil {
+	if err := d.Set("type", extractLabelValueFromList(dockerFile.Services[s.Name].Labels, "nz.sitehost.container.type")); err != nil {
 		return diag.FromErr(err)
 	}
 
-	v, err := strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.image_update"))
+	v, err := strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[s.Name].Labels, "nz.sitehost.container.image_update"))
 	if err != nil {
 		v = false
 	}
@@ -137,7 +101,7 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 
 	// is the stack monitored
-	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.monitored"))
+	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[s.Name].Labels, "nz.sitehost.container.monitored"))
 	if err != nil {
 		v = false
 	}
@@ -146,26 +110,24 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 		return diag.FromErr(err)
 	}
 
-	// should we disable the backup
-	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[stack.Name].Labels, "nz.sitehost.container.backup_disable"))
+	// should we disable the backup?
+	v, err = strconv.ParseBool(extractLabelValueFromList(dockerFile.Services[s.Name].Labels, "nz.sitehost.container.backup_disable"))
 	if err != nil {
 		v = false
 	}
+
 	if err := d.Set("backup_disable", v); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// store the containers, if we need this level of detail
-	// d.Set("containers", stack.Containers)
-
-	// now find the first container, that is the one, with the things... and stuff...
+	// now find the first container that is the one, with the things... and stuff...
 	// we are mainly interested in the ssl enabled value.
 	// and the assumption I am making is that the first one that is true in the stack wins.
 
 	// likely we want to remove this since we can only turn it on, but
 	// not turn it off with an update
 	enableSSL := false
-	for _, container := range stack.Containers {
+	for _, container := range s.Containers {
 		if container.SslEnabled {
 			enableSSL = true
 			break
@@ -180,90 +142,26 @@ func readResource(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 // createResource is a function to create a stack environment.
 func createResource(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	// conf, ok := meta.(*helper.CombinedConfig)
-	// if !ok {
-	//	return diag.Errorf("failed to convert meta object")
-	// }
-	//
-	// stackClient := stack.New(conf.Client)
-	//
-	// name is simply required...
-	// stackNameResponse, err := stackClient.GenerateName(ctx)
-	// if err != nil {
-	//	return diag.Errorf("Failed to generate stack name: %s", err)
-	// }
-	// serverName := fmt.Sprintf("%v", d.Get("server_name"))
-	// name := stackNameResponse.Return.Name
-	//
-	// settings := d.Get("settings").(map[string]string)
-	// environmentVariables := make([]models.EnvironmentVariable, 0, len(settings))
-	// if or environmentVariableName, content := range settings {
-	//	environmentVariables = append(environmentVariables, models.EnvironmentVariable{Name: environmentVariableName, Content: content})
-	// }
-	//
-	// addRequest := stack.AddRequest{
-	//	ServerName:           serverName,
-	//	Name:                 name,
-	//	Label:                fmt.Sprintf("%v", d.Get("label")),
-	//	EnableSSL:            0,
-	//	DockerCompose:        "",
-	//	EnvironmentVariables: environmentVariables,
-	// }
-	// log.Printf("[INFO] stack.addRequest: %s", addRequest)
-
 	return diag.Errorf("giving up")
-	// set the id once we're actually happy...
-	// 	d.SetId(fmt.Sprintf("%s/%s", serverName, name))
-	// fire the request
-	// stackAddResponse, err := stackClient.Add(ctx, )
-	// return nil
 }
 
 // updateResource is a function to update a stack environment.
 func updateResource(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	// conf, ok := meta.(*helper.CombinedConfig)
-	// if !ok {
-	// 	return diag.Errorf("failed to convert meta object")
-	// }
-
-	// client := domain.New(conf.Client)
-	// domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
-
-	return nil
+	return diag.Errorf("giving up")
 }
 
 // deleteResource is a function to delete a stack environment.
 func deleteResource(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	// conf, ok := meta.(*helper.CombinedConfig)
-	// if !ok {
-	// 	return diag.Errorf("failed to convert meta object")
-	// }
-	//
-	// client := domain.New(conf.Client)
-	// domain, err := client.Create(ctx, &models.Domain{Name: d.Get("name").(string)})
-
-	return nil
+	return diag.Errorf("giving up")
 }
 
 func importResource(_ context.Context, d *schema.ResourceData, _ any) ([]*schema.ResourceData, error) {
-	split := strings.Split(d.Id(), "/")
-
-	if len(split) != 2 {
-		return nil, fmt.Errorf("invalid id: %s. The ID should be in the format [server_name]/[stack]", d.Id())
-	}
-
-	serverName := split[0]
-	name := split[1]
-
-	err := d.Set("server_name", serverName)
+	parsedStackName, err := ParseStackName(d.Id())
 	if err != nil {
-		return nil, fmt.Errorf("error importing stack: server %s, name %s, %s", serverName, name, err)
+		return nil, err
 	}
 
-	err = d.Set("name", name)
-	if err != nil {
-		return nil, fmt.Errorf("error importing stack environment: server %s, name %s, %s", serverName, name, err)
-	}
+	d.SetId(fmt.Sprintf("%s/%s/%s", parsedStackName.ServerName, parsedStackName.Project, parsedStackName.Service))
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/gosh/pkg/api/dns"
 	"github.com/sitehostnz/gosh/pkg/models"
-	"github.com/sitehostnz/gosh/pkg/utils"
+	"github.com/sitehostnz/gosh/pkg/net"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
@@ -39,14 +39,14 @@ func createZoneResource(ctx context.Context, d *schema.ResourceData, meta interf
 	client := dns.New(conf.Client)
 	domain := fmt.Sprintf("%v", d.Get("name"))
 
-	// The response don't have the domain name, so we need to get it from the request.
-	resp, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domain})
+	// The responses don't have the domain name, so we need to get it from the request.
+	responsw, err := client.CreateZone(ctx, dns.CreateZoneRequest{DomainName: domain})
 	if err != nil {
 		return diag.Errorf("Error creating domain: %s", err)
 	}
 
-	if !resp.Status {
-		return diag.Errorf("Error creating domain: %s", resp.Msg)
+	if !responsw.Status {
+		return diag.Errorf("Error creating domain: %s", responsw.Msg)
 	}
 
 	d.SetId(domain)
@@ -73,17 +73,7 @@ func readZoneResource(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.Errorf("Error retrieving domain: %s", response.Msg)
 	}
 
-	// iterate over the domains to find the one we are looking for.
-	for _, domain := range response.Return {
-		if domain.Name == d.Id() {
-			if err := d.Set("name", domain.Name); err != nil {
-				return diag.FromErr(err)
-			}
-			return nil
-		}
-	}
-
-	return diag.Errorf("Error finding the domain")
+	return nil
 }
 
 // deleteZoneResource is a function to delete a DNS Zone.
@@ -128,7 +118,7 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	domain := fmt.Sprintf("%v", d.Get("domain"))
-	name := utils.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
+	name := net.ConstructFqdn(fmt.Sprintf("%v", d.Get("name")), domain)
 
 	domainRecord := models.DNSRecord{
 		Name:     strings.TrimSuffix(name, "."),
@@ -155,7 +145,17 @@ func createRecordResource(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.Errorf("Error creating DNS record: %s", resp.Msg)
 	}
 
-	d.SetId(resp.Return.ID)
+	record, err := client.GetRecord(ctx, dns.RecordRequest{
+		ID:         resp.Return.ID,
+		DomainName: domainRecord.Domain,
+	})
+	if err != nil {
+		return diag.Errorf("Error creating DNS record: %s", err)
+	}
+
+	if err := setRecordAttributes(d, record); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Printf("[INFO] Domain Record: %s", d.Id())
 

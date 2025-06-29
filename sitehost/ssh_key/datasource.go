@@ -10,7 +10,7 @@ import (
 
 // DataSource returns a schema with the function to read Server resource.
 func DataSource() *schema.Resource {
-	recordSchema := sshKeyDataSourceSchema()
+	recordSchema := sshKeyDataSourceSchema
 
 	return &schema.Resource{
 		ReadContext: readDataSource,
@@ -22,7 +22,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listDataSource,
-		Schema:      listSshKeysDataSourceSchema(),
+		Schema:      listSSHKeysDataSourceSchema,
 	}
 }
 
@@ -74,9 +74,7 @@ func listDataSource(ctx context.Context, d *schema.ResourceData, meta interface{
 			"content":      v.Content,
 			"date_added":   v.DateAdded,
 			"date_updated": v.DateUpdated,
-			// "custom_image_access": v.CustomImageAccess,
-
-			// I've intentionally left out the grants here
+			// "custom_image_access": strconv.FormatBool(bool(v.CustomImageAccess)),
 		}
 
 		sshKeys = append(sshKeys, k)

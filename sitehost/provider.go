@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/api"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/db/grant"
@@ -16,7 +15,10 @@ import (
 	ssh_user "github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack/ssh/user"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/dns"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/info"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall"
+	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall/securitygroups"
 	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
 )
 
@@ -39,16 +41,15 @@ func New(version string) func() *schema.Provider {
 				}, "api_endpoint": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: "The HTTP(S) API address of the SiteHost API to use.",
+					Description: "The HTTPS API address of the SiteHost API to use.",
 				},
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"sitehost_api": api.DataSource(),
+				"sitehost_info": info.DataSource(),
 
 				"sitehost_cloud_database":       db.DataSource(),
 				"sitehost_cloud_databases":      db.ListDataSource(),
 				"sitehost_cloud_database_grant": grant.DataSource(),
-				"sitehost_cloud_database_user":  db_user.DataSource(),
 
 				"sitehost_cloud_ssh_user": ssh_user.DataSource(),
 
@@ -62,21 +63,22 @@ func New(version string) func() *schema.Provider {
 				"sitehost_ssh_keys": sshkey.ListDataSource(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
+				"sitehost_stack_name":           stack.NameResource(),
+				"sitehost_stack":                stack.Resource(),
+				"sitehost_stack_environment":    environment.Resource(),
 				"sitehost_cloud_database":       db.Resource(),
 				"sitehost_cloud_database_user":  db_user.Resource(),
 				"sitehost_cloud_database_grant": grant.Resource(),
-
-				"sitehost_cloud_ssh_user": ssh_user.Resource(),
+				"sitehost_cloud_ssh_user":       ssh_user.Resource(),
 
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
 
-				"sitehost_server":  server.Resource(),
 				"sitehost_ssh_key": sshkey.Resource(),
 
-				"sitehost_stack_name":        stack.NameResource(),
-				"sitehost_stack":             stack.Resource(),
-				"sitehost_stack_environment": environment.Resource(),
+				"sitehost_server":                server.Resource(),
+				"sitehost_server_security_group": securitygroups.Resource(),
+				"sitehost_server_firewall":       firewall.Resource(),
 			},
 		}
 
