@@ -14,7 +14,7 @@ import (
 func DataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: readResource,
-		Schema:      stackDataSourceSchema,
+		Schema:      stackDataSourceSchema(),
 	}
 }
 
@@ -22,7 +22,7 @@ func DataSource() *schema.Resource {
 func ListDataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: listResource,
-		Schema:      listStackDataSourceSchema,
+		Schema:      listStackDataSourceSchema(),
 	}
 }
 

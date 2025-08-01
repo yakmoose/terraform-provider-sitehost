@@ -21,7 +21,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: resourceSchema,
+		Schema: firewallResourceSchema(),
 	}
 }
 

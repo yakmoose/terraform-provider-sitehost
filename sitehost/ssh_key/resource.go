@@ -12,8 +12,11 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/helper"
 )
 
+var DisplaySensitiveFields = false
+
 // Resource returns a schema with the operations for server.
-func Resource() *schema.Resource {
+func Resource(displaySensitiveFields bool) *schema.Resource {
+	DisplaySensitiveFields = displaySensitiveFields
 	return &schema.Resource{
 		CreateContext: createResource,
 		ReadContext:   readResource,
@@ -22,7 +25,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: resourceSchema,
+		Schema: sshKeyResourceSchema(),
 	}
 }
 

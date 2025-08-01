@@ -19,11 +19,11 @@ func Resource() *schema.Resource {
 		UpdateContext: updateResource,
 		DeleteContext: deleteResource,
 
-		// assume this is correct here....
+		// assume this is correct here...
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
-		Schema: databaseResourceSchema,
+		Schema: databaseResourceSchema(),
 	}
 }
 

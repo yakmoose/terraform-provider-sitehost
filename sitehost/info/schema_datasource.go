@@ -5,6 +5,7 @@ import (
 )
 
 func apiInfoDataSourceSchema() map[string]*schema.Schema {
+
 	return map[string]*schema.Schema{
 		"client_id": {
 			Type:        schema.TypeString,

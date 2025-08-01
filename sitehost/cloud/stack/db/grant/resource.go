@@ -25,7 +25,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
-		Schema: databaseGrantResourceSchema,
+		Schema: databaseGrantResourceSchema(),
 	}
 }
 
@@ -128,6 +128,15 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 	serverName := fmt.Sprint(d.Get("server_name"))
 	mysqlHost := fmt.Sprint(d.Get("mysql_host"))
 	username := fmt.Sprint(d.Get("username"))
+	database := fmt.Sprint(d.Get("database"))
+
+	var g []string
+	if grants, ok := d.Get("grants").([]interface{}); ok {
+		g = make([]string, len(grants))
+		for i, v := range grants {
+			g[i] = fmt.Sprint(v)
+		}
+	}
 
 	response, err := client.Update(
 		ctx,
@@ -135,7 +144,8 @@ func updateResource(ctx context.Context, d *schema.ResourceData, meta interface{
 			ServerName: serverName,
 			MySQLHost:  mysqlHost,
 			Username:   username,
-			//			Grants:     d.Get("grants").([]interface{}),
+			Database:   database,
+			Grants:     g,
 		},
 	)
 	if err != nil {

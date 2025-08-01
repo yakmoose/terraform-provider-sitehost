@@ -25,7 +25,7 @@ func ZoneResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		Schema: resourceZoneSchema,
+		Schema: zoneResourceSchema(),
 	}
 }
 
@@ -106,7 +106,7 @@ func RecordResource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importRecordResource,
 		},
-		Schema: resourceRecordSchema,
+		Schema: recordResourceSchema(),
 	}
 }
 
