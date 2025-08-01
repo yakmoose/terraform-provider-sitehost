@@ -3,7 +3,6 @@ package main
 
 import (
 	"flag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost"
 )
@@ -22,6 +21,7 @@ func main() {
 	opts := &plugin.ServeOpts{
 		Debug:        debugMode,
 		ProviderFunc: sitehost.New(version),
+		ProviderAddr: "sitehostnz/sitehost",
 	}
 
 	plugin.Serve(opts)

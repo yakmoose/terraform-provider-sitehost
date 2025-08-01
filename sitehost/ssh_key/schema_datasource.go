@@ -37,10 +37,23 @@ func sshKeyDataSourceSchema() map[string]*schema.Schema {
 			Description: "The `date_updated` is the date/time when the SSH Key was updated.",
 		},
 		"custom_image_access": {
-			Type:        schema.TypeString,
+			Type:        schema.TypeBool,
 			Optional:    true,
 			Computed:    true,
 			Description: "`custom_image_access` determines whether the key can be used to access custom images.",
+		},
+	}
+}
+
+func listSSHKeysDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"ssh_keys": {
+			Type:        schema.TypeSet,
+			Computed:    true,
+			Description: "The list of ssh keys",
+			Elem: &schema.Resource{
+				Schema: sshKeyDataSourceSchema(),
+			},
 		},
 	}
 }
