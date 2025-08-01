@@ -24,7 +24,7 @@ func Resource() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importResource,
 		},
-		Schema: resourceSchema,
+		Schema: stackResourceSchema(),
 	}
 }
 

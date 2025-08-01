@@ -4,7 +4,6 @@ package sitehost
 import (
 	"context"
 	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/cloud/stack"
@@ -20,10 +19,15 @@ import (
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost/server/firewall/securitygroups"
 	sshkey "github.com/sitehostnz/terraform-provider-sitehost/sitehost/ssh_key"
+	"os"
 )
+
+var DisplaySensitiveFields bool
 
 // New returns a schema.Provider for SiteHost.
 func New(version string) func() *schema.Provider {
+	DisplaySensitiveFields = os.Getenv("SITEHOST_TF_DISPLAY_SENSITIVE_FIELDS") == "true"
+
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
@@ -37,7 +41,7 @@ func New(version string) func() *schema.Provider {
 					Required:    true,
 					DefaultFunc: schema.EnvDefaultFunc("SH_APIKEY", nil),
 					Description: "The API Key that allows you access to your SiteHost account.",
-					Sensitive:   true,
+					Sensitive:   !DisplaySensitiveFields,
 				}, "api_endpoint": {
 					Type:        schema.TypeString,
 					Optional:    true,
@@ -69,14 +73,14 @@ func New(version string) func() *schema.Provider {
 				"sitehost_cloud_database":       db.Resource(),
 				"sitehost_cloud_database_user":  db_user.Resource(),
 				"sitehost_cloud_database_grant": grant.Resource(),
-				"sitehost_cloud_ssh_user":       ssh_user.Resource(),
+				"sitehost_cloud_ssh_user":       ssh_user.Resource(DisplaySensitiveFields),
 
 				"sitehost_dns_zone":   dns.ZoneResource(),
 				"sitehost_dns_record": dns.RecordResource(),
 
-				"sitehost_ssh_key": sshkey.Resource(),
+				"sitehost_ssh_key": sshkey.Resource(DisplaySensitiveFields),
 
-				"sitehost_server":                server.Resource(),
+				"sitehost_server":                server.Resource(DisplaySensitiveFields),
 				"sitehost_server_security_group": securitygroups.Resource(),
 				"sitehost_server_firewall":       firewall.Resource(),
 			},

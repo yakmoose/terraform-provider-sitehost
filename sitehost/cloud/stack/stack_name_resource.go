@@ -19,15 +19,7 @@ func NameResource() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: "The cloud stack name",
-			},
-		},
+		Schema: stackNameResourceSchema(),
 	}
 }
 

@@ -3,7 +3,6 @@ package main
 
 import (
 	"flag"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/sitehostnz/terraform-provider-sitehost/sitehost"
 )

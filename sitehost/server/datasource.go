@@ -13,7 +13,7 @@ import (
 func DataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: readDataSource,
-		Schema:      serverDataSourceSchema,
+		Schema:      serverDataSourceSchema(),
 	}
 }
 
@@ -35,7 +35,7 @@ func readDataSource(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diag.Errorf("Error retrieving server: %s", err)
 	}
 	d.SetId(resp.Server.Name)
-	
+
 	if !resp.Status {
 		return diag.Errorf("Error retrieving server: %s", resp.Msg)
 	}

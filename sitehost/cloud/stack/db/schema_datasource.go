@@ -5,29 +5,31 @@ import (
 )
 
 // databaseDataSourceSchema returns a schema with the function to read a stack resource.
-var databaseDataSourceSchema = map[string]*schema.Schema{
-	//	return map[string]*schema.Schema{
-	"server_name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The server id/name",
-	},
-	"mysql_host": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The mysqlhost",
-	},
-	"name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "The database name",
-	},
-	"backup_container": {
-		Type:        schema.TypeString,
-		Description: "The container where backups are stored",
-		Computed:    true,
-	},
-	//	}
+func databaseDataSourceSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		//	return map[string]*schema.Schema{
+		"server_name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The server id/name",
+		},
+		"mysql_host": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The mysqlhost",
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "The database name",
+		},
+		"backup_container": {
+			Type:        schema.TypeString,
+			Description: "The container where backups are stored",
+			Computed:    true,
+		},
+		//	}
+	}
 }
 
 // listDatabaseDataSourceSchema is the datasource for a listing of databases.
